@@ -1,1 +1,0 @@
-"""Model definition package placeholder."""

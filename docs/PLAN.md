@@ -2,19 +2,21 @@
 
 ## Goal
 
-Build a focused portfolio project that demonstrates both Deep Learning and Generative Modeling through image representation, reconstruction, and generation.
+Build an interactive portfolio project demonstrating both Deep Learning and Generative Modeling through image reconstruction, latent representations, and generation.
 
-## Milestones
+## Current Milestone Sequence
 
 1. Establish the project structure and dependency baseline.
-2. Implement an Autoencoder baseline.
-3. Implement a Variational Autoencoder.
-4. Run reconstruction experiments.
-5. Generate samples from latent space.
-6. Add latent-space interpolation experiments.
-7. Compare AE and VAE behavior with concise analysis.
+2. Complete Project Design.
+3. Implement an Autoencoder baseline.
+4. Implement a Variational Autoencoder.
+5. Run reconstruction and latent-space generation experiments.
+6. Evaluate models and compare AE vs VAE behavior.
+7. Complete engineering/QA and stabilization.
+8. Add an interactive GUI for educational model and latent-space exploration.
+9. Close the project as a portfolio artifact.
 
-## Boundaries
+## High-Level Boundaries
 
 In scope:
 
@@ -22,11 +24,21 @@ In scope:
 - Reconstruction quality experiments
 - Latent-space generation and interpolation
 - Clear experiment outputs and analysis
+- A future educational GUI layered over working models
 
 Out of scope:
 
-- GUI development
 - Cloud deployment
+- Authentication
+- Backend APIs
+- Databases
+- LLM integration
+- Unrelated AI features
+- Unnecessary infrastructure
+
+## Next Step
+
+The next milestone is Project Design. Dataset choice, neural-network architecture, hyperparameters, GUI framework, and experiment configuration are intentionally undecided until that step.
 - APIs and authentication
 - Databases
 - LLM integration
