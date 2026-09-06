@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document records current core infrastructure, the Fashion-MNIST data boundary, Autoencoder and Variational Autoencoder model layers, AE/VAE training, AE reconstruction evaluation, VAE generation/interpolation core, AE vs VAE comparison, basic Tkinter GUI, and intended future component boundaries. It does not describe large experiment suites or advanced GUI latent controls.
+This document records current core infrastructure, the Fashion-MNIST data boundary, Autoencoder and Variational Autoencoder model layers, AE/VAE training, AE reconstruction evaluation, VAE generation/interpolation core, AE vs VAE comparison, Tkinter GUI, VAE latent-space GUI controls, and intended future component boundaries. It does not describe large experiment suites.
 
 ## Decisions Already Made
 
@@ -269,7 +269,7 @@ Comparison outputs are stored under a local ignored experiment directory:
 
 Current GUI module:
 
-- `gui.py`: single-window Tkinter model explorer, non-visual controller service, checkpoint loading orchestration, Fashion-MNIST test-image browsing, reconstruction display, and VAE random generation display.
+- `gui.py`: single-window Tkinter model explorer, non-visual controller service, checkpoint loading orchestration, Fashion-MNIST test-image browsing, reconstruction display, VAE random generation display, VAE latent interpolation, and bounded latent-vector exploration.
 
 GUI command:
 
@@ -282,18 +282,19 @@ GUI policy:
 - Tkinter is the selected GUI framework.
 - The GUI loads existing checkpoints and never trains automatically.
 - Checkpoint compatibility is checked against the selected model type and preset.
-- The GUI uses existing device, checkpoint, data, model reconstruction, and VAE generation APIs.
+- The GUI uses existing device, checkpoint, data, model reconstruction, VAE generation, and latent-space APIs.
 - Recoverable errors are shown to the user and keep the window usable.
-- Current VAE GUI behavior includes random generation only, not latent sliders or interpolation controls.
+- VAE-only controls are enabled only after a compatible VAE checkpoint is loaded.
+- Latent interpolation encodes two selected test images, linearly blends their latent mean vectors, and decodes the selected interpolation point.
+- Latent sliders start from an encoded selected image, clamp edited dimensions to bounded values, and decode through the already-loaded VAE.
 
 ## Planned Component Boundaries
 
 Future implementation should separate these responsibilities:
 
 - plotting and visualization helpers
-- latent-space GUI controls
 
-Core infrastructure, Fashion-MNIST data modules, AE and VAE model layers, AE/VAE training, AE reconstruction evaluation, VAE generation/interpolation core, AE vs VAE comparison, and basic Tkinter GUI exist now. Latent-space GUI controls should be introduced when their milestone begins.
+Core infrastructure, Fashion-MNIST data modules, AE and VAE model layers, AE/VAE training, AE reconstruction evaluation, VAE generation/interpolation core, AE vs VAE comparison, basic Tkinter GUI, and latent-space GUI controls exist now.
 
 ## Planned Data Flow
 
@@ -312,7 +313,7 @@ At a high level, future runs should follow this flow:
 11. Generate VAE samples and latent interpolations only from an existing VAE checkpoint.
 12. Compare existing AE and VAE checkpoints without retraining.
 13. Open a basic Tkinter GUI that loads existing checkpoints, reconstructs test images, and displays VAE random generation.
-14. Later milestones will add latent-space GUI controls.
+14. Use VAE-only GUI controls to interpolate between two selected test images and explore bounded latent-vector edits.
 
 ## Deferred Implementation Details
 
@@ -320,7 +321,6 @@ The following are intentionally not decided here:
 
 - final production hyperparameters
 - complete experiment artifact schema
-- latent slider behavior
-- interpolation GUI behavior
+- final production GUI polish
 
 These choices belong to later implementation milestones.

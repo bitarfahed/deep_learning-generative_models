@@ -948,3 +948,106 @@ Final report should contain only:
 
 Stop after the basic GUI works.
 ```
+
+## Prompt 14 - Latent-Space GUI Features
+
+```text
+PROMPT 14 - Latent-Space GUI Features
+
+Inspect the current repository and reuse the existing GUI and VAE core APIs.
+
+Goal:
+Extend the existing Tkinter GUI with the planned latent-space exploration features.
+
+Keep the GUI simple. Do not redesign the interface.
+
+Requirements:
+
+1. Latent interpolation
+
+- allow the user to select two Fashion-MNIST test images
+- encode both with the loaded VAE
+- provide a slider from image A to image B
+- decode the interpolated latent representation
+- update the displayed generated/interpolated image
+- keep the implementation reusable and outside the Tkinter layer where possible
+
+2. Latent-dimension exploration
+
+- expose controlled sliders for the latent vector of a selected/encoded image
+- allow the user to modify latent dimensions and decode the modified vector
+- show the resulting generated image
+
+Keep slider ranges bounded and sensible.
+Do not allow arbitrary unsafe values.
+
+3. GUI behavior
+
+- these features should be available only when a compatible VAE checkpoint is loaded
+- disable or clearly explain unavailable controls for AE checkpoints
+- preserve existing reconstruction and random-generation behavior
+- do not add new windows, tabs, or unnecessary navigation unless technically required
+
+4. Architecture information
+
+- keep the existing Small / Medium / Deep preset selection
+- continue showing the concise description of the selected architecture
+- do not expose internal architecture editing
+
+5. Performance
+
+- latent exploration should use the already-loaded model
+- do not retrain
+- do not reload the model on every slider movement
+- keep interaction responsive on CPU where practical
+
+6. Tests
+   Add focused tests for the non-visual latent exploration logic:
+
+- interpolation endpoints
+- interpolation midpoint/shape behavior
+- latent-vector modification
+- decoded output shape/range
+- AE/VAE feature gating where practical
+
+Avoid fragile Tkinter layout/pixel tests.
+
+7. Manual smoke verification
+   Verify:
+
+- VAE checkpoint loads
+- two images can be selected
+- interpolation slider works
+- latent sliders change the decoded result
+- AE mode does not incorrectly expose VAE-only behavior
+- existing GUI features still work
+
+8. Documentation
+   Update documentation only where needed to describe the completed GUI functionality.
+
+9. Prompt Book
+   Append this prompt to docs/PROMPTS_BOOK.md as:
+
+Prompt 14 - Latent-Space GUI Features
+
+Preserve all previous entries.
+
+Do NOT add:
+
+- training from GUI
+- new model families
+- complex visual redesign
+- cloud/web deployment
+- unrelated features
+
+Run the full test suite and commit the completed work.
+
+Final report should contain only:
+
+- main changes
+- tests/results
+- GUI smoke-test result
+- any problem or decision requiring attention
+
+Stop after latent interpolation and latent-vector exploration work in the GUI.
+```

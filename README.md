@@ -31,7 +31,7 @@ The project emphasizes educational value, clear architecture, reproducible exper
 
 ## Current status
 
-Repository bootstrap, project design documentation, core infrastructure, the Fashion-MNIST data pipeline, AE/VAE model layers, explicit AE/VAE training, AE reconstruction evaluation, VAE generation/interpolation core, AE vs VAE comparison, and the basic Tkinter GUI are complete. Latent-slider GUI features have not been implemented yet.
+Repository bootstrap, project design documentation, core infrastructure, the Fashion-MNIST data pipeline, AE/VAE model layers, explicit AE/VAE training, AE reconstruction evaluation, VAE generation/interpolation core, AE vs VAE comparison, the basic Tkinter GUI, and VAE latent-space GUI controls are complete.
 
 Run the infrastructure smoke check from the source tree:
 
@@ -89,7 +89,7 @@ Open the basic Tkinter model explorer:
 uv run python -m deep_learning_generative_models.gui
 ```
 
-The GUI is intended as an educational exploration layer over working models, not as the main purpose of the project. Training does not run automatically when the GUI is opened.
+The GUI is intended as an educational exploration layer over working models, not as the main purpose of the project. It can reconstruct selected Fashion-MNIST examples, generate random VAE samples, interpolate between two selected images with a loaded VAE, and decode bounded latent-vector slider edits. Training does not run automatically when the GUI is opened.
 
 Cloud deployment, authentication, databases, backend APIs, LLM integration, TensorFlow, GANs, diffusion models, transformers, unrelated AI features, and unnecessary infrastructure are outside the current scope unless later justified.
 

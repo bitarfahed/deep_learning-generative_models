@@ -45,7 +45,7 @@ Decided:
 - The baseline model will be a Convolutional Autoencoder (AE).
 - The AE is a meaningful project stage for representation learning and reconstruction, not throwaway scaffolding.
 - The main generative model will be a Variational Autoencoder (VAE).
-- The VAE should eventually support reconstruction, latent-space sampling, image generation, interpolation, and interactive latent-space exploration.
+- The VAE supports reconstruction, latent-space sampling, image generation, interpolation, and interactive latent-space exploration.
 - GANs, diffusion models, transformers, and LLMs are outside the project scope.
 
 Implemented architecture policy:
@@ -142,18 +142,13 @@ It allows users to:
 - compare original images with reconstructions
 - load previously trained checkpoints
 - perform random generation with the VAE
-
-It should eventually allow users to:
-
 - manipulate latent dimensions through controlled sliders
 - interpolate between latent representations of two selected images
 
-Starting a new training run from the GUI may later be supported as an explicit user action. Training must never occur automatically merely because the GUI/application was opened.
+Training must never occur automatically merely because the GUI/application was opened.
 
 Deferred:
 
-- latent slider controls
-- interpolation controls
 - training controls, unless later explicitly justified
 
 ## Scope Boundaries
@@ -187,7 +182,7 @@ Unless a later prompt explicitly changes the scope, do not add:
 11. AE vs VAE experiments/comparison - completed
 12. Engineering and QA - completed
 13. Interactive GUI core - completed
-14. Latent-space GUI features
+14. Latent-space GUI features - completed
 15. Final documentation and portfolio audit
 
 This sequence is a planning guide, not a requirement to force exactly 15 implementation prompts. Future tasks may be split or combined when technically justified, while keeping scope controlled.
@@ -198,4 +193,4 @@ This project is being developed with significant assistance from ChatGPT and Cod
 
 ## Next Step
 
-The next milestone is Latent-space GUI features. It should add latent controls without introducing unrelated infrastructure.
+The next milestone is Final documentation and portfolio audit.
