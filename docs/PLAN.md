@@ -181,7 +181,7 @@ Unless a later prompt explicitly changes the scope, do not add:
 5. Convolutional Autoencoder model - completed
 6. Autoencoder training - completed
 7. Autoencoder evaluation/reconstruction - completed
-8. Variational Autoencoder model
+8. Variational Autoencoder model - completed
 9. VAE training integration
 10. Generation and latent-space exploration core
 11. AE vs VAE experiments/comparison
@@ -198,4 +198,4 @@ This project is being developed with significant assistance from ChatGPT and Cod
 
 ## Next Step
 
-The next milestone is Variational Autoencoder model. It should add VAE model logic without implementing random generation, latent interpolation, AE vs VAE comparison, or GUI behavior prematurely.
+The next milestone is VAE training integration. It should add VAE training behavior without implementing random generation, latent interpolation, AE vs VAE comparison, or GUI behavior prematurely.

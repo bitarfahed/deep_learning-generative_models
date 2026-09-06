@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document records current core infrastructure, the Fashion-MNIST data boundary, the Convolutional Autoencoder model layer, Autoencoder training, AE reconstruction evaluation, and intended future component boundaries. It does not describe VAE, generation, or GUI implementation.
+This document records current core infrastructure, the Fashion-MNIST data boundary, Autoencoder and Variational Autoencoder model layers, Autoencoder training, AE reconstruction evaluation, and intended future component boundaries. It does not describe VAE training, generation workflows, latent interpolation workflows, or GUI implementation.
 
 ## Decisions Already Made
 
@@ -83,6 +83,46 @@ AE presets:
 
 All presets encode to a `7x7` spatial feature map before the linear latent projection. Decoders use corresponding convolutional refinement followed by two transposed-convolution upsampling stages back to `28x28`.
 
+## Implemented VAE Model Boundary
+
+Current VAE model support lives in `models.py` beside the AE implementation.
+
+Model interface:
+
+- `encode(x) -> mu, logvar`
+- `reparameterize(mu, logvar) -> z`
+- `decode(z) -> reconstruction`
+- `forward(x) -> VAEForwardOutput`
+
+`VAEForwardOutput` contains:
+
+- `reconstruction`
+- `mu`
+- `logvar`
+- `z`
+
+Latent distribution policy:
+
+- `latent_dim` comes from the shared experiment configuration.
+- `mu`, `logvar`, and sampled `z` each have shape `[batch, latent_dim]`.
+- Reparameterization uses `std = exp(0.5 * logvar)`, `eps = randn_like(std)`, and `z = mu + eps * std`.
+- The reparameterization path remains differentiable for future VAE training.
+
+Output contract:
+
+- input shape: `[batch, 1, 28, 28]`
+- reconstruction shape: `[batch, 1, 28, 28]`
+- reconstruction value range: `[0.0, 1.0]`
+- the decoder ends with `Sigmoid`, matching Fashion-MNIST tensors produced by `ToTensor()`
+
+VAE presets use the same convolutional channel progression as the AE presets:
+
+- Small VAE: encoder channels `(16, 32)`, compact variational baseline.
+- Medium VAE: encoder channels `(16, 32, 64)`, balanced channel capacity.
+- Deep VAE: encoder channels `(32, 64, 128, 128)`, higher channel capacity.
+
+The VAE differs from the AE by using separate linear heads for `mu` and `logvar`. It shares the same fixed preset philosophy and the same `7x7` encoded spatial feature size before latent projection.
+
 ## Implemented AE Training Boundary
 
 Current training module:
@@ -154,12 +194,13 @@ The evaluation summary includes checkpoint path, model type, architecture preset
 
 Future implementation should separate these responsibilities:
 
+- VAE training
 - AE vs VAE comparison
 - generation and latent-space utilities
 - plotting and visualization helpers
 - later GUI exploration layer
 
-Core infrastructure, Fashion-MNIST data modules, the AE model layer, AE training, and AE reconstruction evaluation exist now. VAE, generation, visualization, GUI, and comparison modules should be introduced when their milestone begins.
+Core infrastructure, Fashion-MNIST data modules, AE and VAE model layers, AE training, and AE reconstruction evaluation exist now. VAE training, generation, visualization, GUI, and comparison modules should be introduced when their milestone begins.
 
 ## Planned Data Flow
 
@@ -174,14 +215,14 @@ At a high level, future runs should follow this flow:
 7. Build a Convolutional Autoencoder from the selected architecture preset when a future command needs the AE.
 8. Train the AE only through an explicit training command and save checkpoint/history artifacts.
 9. Evaluate trained AE checkpoints without retraining and save reconstruction artifacts.
-10. Later milestones will add VAE behavior, generation, AE vs VAE comparison, and GUI exploration.
+10. Build a VAE from the selected architecture preset when a future command needs the VAE.
+11. Later milestones will add VAE training, generation, AE vs VAE comparison, and GUI exploration.
 
 ## Deferred Implementation Details
 
 The following are intentionally not decided here:
 
-- VAE neural-network layers
-- VAE channel counts and latent policy
+- VAE loss composition and training loop
 - final production hyperparameters
 - complete experiment artifact schema
 - GUI framework

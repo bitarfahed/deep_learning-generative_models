@@ -401,3 +401,73 @@ You may commit the completed work with an appropriate commit message.
 
 Stop after the Autoencoder baseline is fully evaluable and produces reconstruction outputs. Do not begin VAE implementation.
 ```
+
+## Prompt 8 - Variational Autoencoder Model
+
+```text
+PROMPT 8 — Variational Autoencoder Model
+
+Inspect the current repository before making any changes.
+
+This task is ONLY to implement the Variational Autoencoder model layer.
+
+Do NOT implement:
+- VAE training loop
+- generation CLI
+- latent interpolation workflow
+- AE vs VAE experiments
+- GUI
+- new dataset logic
+
+Reuse the existing package structure, configuration system, Fashion-MNIST tensor contract, Autoencoder preset conventions, model factory patterns, and documentation conventions.
+
+Goal:
+Implement a clean VAE model for Fashion-MNIST that is structurally aligned with the existing Convolutional Autoencoder baseline.
+
+The VAE must accept [batch, 1, 28, 28], encode images into latent-distribution parameters, sample a latent vector using the reparameterization trick, decode latent vectors back into [batch, 1, 28, 28], support the fixed Small / Medium / Deep architecture presets, and expose the components needed later for training, reconstruction, generation, interpolation, and GUI exploration.
+
+Inspect the existing AE architecture before implementing: Autoencoder implementation, preset definitions, model factory, config validation, and docs/ARCHITECTURE.md. Reuse architectural conventions where sensible. The VAE should feel like a natural extension of the AE, not a separate system. Do not duplicate preset-selection logic unnecessarily.
+
+VAE encoder:
+Implement an encoder that produces mu and logvar for the latent distribution. The encoder should reuse or closely follow the convolutional feature-extraction pattern already established by the AE presets. Keep the architecture simple and explainable. Do not add attention, residual blocks, pretrained backbones, unnecessary normalization, or unrelated architectural complexity.
+
+Reparameterization:
+Implement a dedicated, testable reparameterization function: std = exp(0.5 * logvar), eps = random normal noise, z = mu + eps * std. It must be training-compatible, differentiable, numerically reasonable, and isolated enough to test. Do not detach tensors in a way that breaks gradient flow.
+
+Decoder:
+Implement a decoder that maps latent vectors back to image space: [batch, latent_dim] -> [batch, 1, 28, 28]. The output activation must remain compatible with current Fashion-MNIST preprocessing and reconstruction-loss policy. Reuse decoder conventions from the AE where appropriate.
+
+Forward interface:
+Expose encode(x) -> mu, logvar; reparameterize(mu, logvar) -> z; decode(z) -> reconstruction; and forward(x) -> reconstruction, mu, logvar, z. A small typed container/dataclass may be used if it improves clarity. Future training code must be able to access reconstruction, mu, logvar, and z.
+
+Fixed architecture presets:
+Support small, medium, and deep. Maintain the same philosophy as the AE: fixed internal architectures, progressively increasing capacity, lightweight enough for Fashion-MNIST, and no arbitrary user modification of internal layers. Prefer consistency with the AE preset family. Document any justified differences.
+
+Latent dimension:
+Use the existing configuration system for latent_dim. Keep latent_dim explicit and compatible with future random generation, latent interpolation, and latent sliders in the GUI. Do not hard-code a single latent size. Validate latent dimension appropriately.
+
+Model factory integration:
+Extend existing model construction/factory so model type ae creates the Autoencoder and model type vae creates the Variational Autoencoder. Avoid parallel factories if one clean shared mechanism is sufficient. Do not break existing AE behavior.
+
+Human-readable architecture descriptions:
+Extend the architecture-description mechanism so the future GUI can display concise descriptions for VAE presets. Descriptions should reflect the implementation, mentioning convolutional encoder depth, latent dimension/distribution, and decoder capacity. Keep descriptions concise.
+
+Parameter counts:
+Report trainable parameter counts for VAE Small, Medium, and Deep. Presets should represent a sensible capacity progression. Do not optimize merely for parameter count.
+
+Tests:
+Add focused pytest coverage for Small/Medium/Deep construction, forward output shapes, mu shape, logvar shape, latent z shape, decoder output shape, output value range, reparameterization output shape, gradient flow through reparameterization, factory construction using model type vae, invalid model/preset handling, and AE factory behavior remaining intact. Use synthetic tensors only. Do not download Fashion-MNIST, require CUDA, or train the VAE.
+
+Documentation:
+Update docs/ARCHITECTURE.md with VAE encoder, mu/logvar, reparameterization, latent z, decoder, Small/Medium/Deep preset relationship, and forward data flow. Update docs/PLAN.md to mark VAE model complete if appropriate. Update README.md only with a concise VAE architecture note if useful. Do not document training results because VAE training is not implemented yet.
+
+Prompt Book:
+Append this exact development prompt, or a faithful preserved copy, to docs/PROMPTS_BOOK.md. Append only, preserve all previous entries, maintain chronological order, and identify this entry as Prompt 8 — Variational Autoencoder Model. Do not rewrite earlier prompts.
+
+Verification:
+Before finishing, run the full relevant pytest suite, instantiate AE and VAE Small/Medium/Deep presets, run synthetic forward passes, verify all VAE tensor shapes, verify reparameterization remains differentiable, verify output range contract, report VAE parameter counts, verify AE behavior/tests remain valid, verify no VAE training/generation/interpolation/GUI implementation was added, and inspect Git status.
+
+You may commit the completed work with an appropriate commit message.
+
+Stop after the VAE model layer is complete. Do not begin VAE training.
+```

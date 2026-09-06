@@ -25,12 +25,12 @@ The project emphasizes educational value, clear architecture, reproducible exper
 - Dataset: Fashion-MNIST, downloaded automatically when needed and cached locally.
 - Data contract: image batches preserve spatial dimensions as `[batch, 1, 28, 28]`.
 - Baseline: Convolutional Autoencoder (AE) for image representation and reconstruction.
-- Generative model: Variational Autoencoder (VAE) for reconstruction, sampling, generation, interpolation, and later interactive latent-space exploration.
+- Generative model: Variational Autoencoder (VAE) model layer for reconstruction, latent distributions, sampling via reparameterization, and later training/generation/interpolation.
 - AE architecture presets: Small, Medium, and Deep fixed convolutional presets.
 
 ## Current status
 
-Repository bootstrap, project design documentation, core infrastructure, the Fashion-MNIST data pipeline, the Convolutional Autoencoder model layer, explicit Autoencoder training, and AE reconstruction evaluation are complete. VAE logic, generation utilities, and GUI code have not been implemented yet.
+Repository bootstrap, project design documentation, core infrastructure, the Fashion-MNIST data pipeline, the Convolutional Autoencoder model layer, explicit Autoencoder training, AE reconstruction evaluation, and the VAE model layer are complete. VAE training, generation utilities, latent interpolation workflows, and GUI code have not been implemented yet.
 
 Run the infrastructure smoke check from the source tree:
 

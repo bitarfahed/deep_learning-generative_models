@@ -1,4 +1,4 @@
-"""Convolutional Autoencoder model definitions."""
+"""Autoencoder and Variational Autoencoder model definitions."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from torch import Tensor, nn
 from deep_learning_generative_models.config import ArchitecturePreset, ExperimentConfig
 from deep_learning_generative_models.data import IMAGE_SHAPE
 
-ModelKind = Literal["ae"]
+ModelKind = Literal["ae", "vae"]
 
 _ENCODED_SPATIAL_SIZE: Final[int] = 7
 
@@ -59,6 +59,42 @@ AUTOENCODER_PRESETS: Final[dict[str, AutoencoderPreset]] = {
 }
 
 
+VAE_PRESETS: Final[dict[str, AutoencoderPreset]] = {
+    "small": AutoencoderPreset(
+        name="small",
+        encoder_channels=AUTOENCODER_PRESETS["small"].encoder_channels,
+        description=(
+            "Small VAE: 2 convolutional encoder blocks, compact variational "
+            "latent distribution, lightweight decoder for Fashion-MNIST."
+        ),
+    ),
+    "medium": AutoencoderPreset(
+        name="medium",
+        encoder_channels=AUTOENCODER_PRESETS["medium"].encoder_channels,
+        description=(
+            "Medium VAE: 3 convolutional encoder blocks, balanced channel "
+            "capacity, variational latent distribution, matching decoder."
+        ),
+    ),
+    "deep": AutoencoderPreset(
+        name="deep",
+        encoder_channels=AUTOENCODER_PRESETS["deep"].encoder_channels,
+        description=(
+            "Deep VAE: 4 convolutional encoder blocks with higher channel "
+            "capacity, variational latent distribution, stronger decoder."
+        ),
+    ),
+}
+
+
+@dataclass(frozen=True)
+class VAEForwardOutput:
+    reconstruction: Tensor
+    mu: Tensor
+    logvar: Tensor
+    z: Tensor
+
+
 class ConvolutionalAutoencoder(nn.Module):
     """Convolutional Autoencoder for Fashion-MNIST images."""
 
@@ -101,6 +137,61 @@ class ConvolutionalAutoencoder(nn.Module):
         return self.decode(self.encode(x))
 
 
+class VariationalAutoencoder(nn.Module):
+    """Variational Autoencoder for Fashion-MNIST images."""
+
+    def __init__(self, preset: AutoencoderPreset, latent_dim: int) -> None:
+        super().__init__()
+        if latent_dim <= 0:
+            raise ValueError("latent_dim must be positive")
+
+        self.preset = preset
+        self.latent_dim = latent_dim
+        self.encoder = _build_encoder(preset.encoder_channels)
+        flattened_dim = preset.encoded_channels * _ENCODED_SPATIAL_SIZE**2
+        self.to_mu = nn.Linear(flattened_dim, latent_dim)
+        self.to_logvar = nn.Linear(flattened_dim, latent_dim)
+        self.from_latent = nn.Linear(latent_dim, flattened_dim)
+        self.decoder = _build_decoder(preset.encoder_channels)
+
+    @property
+    def description(self) -> str:
+        return self.preset.description
+
+    @property
+    def trainable_parameter_count(self) -> int:
+        return count_trainable_parameters(self)
+
+    def encode(self, x: Tensor) -> tuple[Tensor, Tensor]:
+        features = self.encoder(x)
+        flattened = torch.flatten(features, start_dim=1)
+        return self.to_mu(flattened), self.to_logvar(flattened)
+
+    def reparameterize(self, mu: Tensor, logvar: Tensor) -> Tensor:
+        return reparameterize(mu, logvar)
+
+    def decode(self, z: Tensor) -> Tensor:
+        features = self.from_latent(z)
+        features = features.view(
+            z.shape[0],
+            self.preset.encoded_channels,
+            _ENCODED_SPATIAL_SIZE,
+            _ENCODED_SPATIAL_SIZE,
+        )
+        return self.decoder(features)
+
+    def forward(self, x: Tensor) -> VAEForwardOutput:
+        mu, logvar = self.encode(x)
+        z = self.reparameterize(mu, logvar)
+        reconstruction = self.decode(z)
+        return VAEForwardOutput(
+            reconstruction=reconstruction,
+            mu=mu,
+            logvar=logvar,
+            z=z,
+        )
+
+
 def build_autoencoder(
     architecture_preset: ArchitecturePreset | str,
     latent_dim: int,
@@ -109,13 +200,26 @@ def build_autoencoder(
     return ConvolutionalAutoencoder(preset=preset, latent_dim=latent_dim)
 
 
-def build_model(config: ExperimentConfig) -> ConvolutionalAutoencoder:
-    if config.model_type != "ae":
-        raise ValueError("Only the AE model is implemented at this milestone")
-    return build_autoencoder(
-        architecture_preset=config.architecture_preset,
-        latent_dim=config.latent_dim,
-    )
+def build_variational_autoencoder(
+    architecture_preset: ArchitecturePreset | str,
+    latent_dim: int,
+) -> VariationalAutoencoder:
+    preset = get_vae_preset(architecture_preset)
+    return VariationalAutoencoder(preset=preset, latent_dim=latent_dim)
+
+
+def build_model(config: ExperimentConfig) -> ConvolutionalAutoencoder | VariationalAutoencoder:
+    if config.model_type == "ae":
+        return build_autoencoder(
+            architecture_preset=config.architecture_preset,
+            latent_dim=config.latent_dim,
+        )
+    if config.model_type == "vae":
+        return build_variational_autoencoder(
+            architecture_preset=config.architecture_preset,
+            latent_dim=config.latent_dim,
+        )
+    raise ValueError(f"Invalid model type: {config.model_type!r}")
 
 
 def get_autoencoder_preset(
@@ -129,6 +233,34 @@ def get_autoencoder_preset(
 
 def get_autoencoder_description(architecture_preset: ArchitecturePreset | str) -> str:
     return get_autoencoder_preset(architecture_preset).description
+
+
+def get_vae_preset(architecture_preset: ArchitecturePreset | str) -> AutoencoderPreset:
+    try:
+        return VAE_PRESETS[architecture_preset]
+    except KeyError as error:
+        raise ValueError(f"Invalid VAE architecture preset: {architecture_preset!r}") from error
+
+
+def get_vae_description(architecture_preset: ArchitecturePreset | str) -> str:
+    return get_vae_preset(architecture_preset).description
+
+
+def get_model_description(
+    model_type: ModelKind | str,
+    architecture_preset: ArchitecturePreset | str,
+) -> str:
+    if model_type == "ae":
+        return get_autoencoder_description(architecture_preset)
+    if model_type == "vae":
+        return get_vae_description(architecture_preset)
+    raise ValueError(f"Invalid model type: {model_type!r}")
+
+
+def reparameterize(mu: Tensor, logvar: Tensor) -> Tensor:
+    std = torch.exp(0.5 * logvar)
+    eps = torch.randn_like(std)
+    return mu + eps * std
 
 
 def count_trainable_parameters(model: nn.Module) -> int:
