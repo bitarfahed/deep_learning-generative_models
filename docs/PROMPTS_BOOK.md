@@ -1051,3 +1051,154 @@ Final report should contain only:
 
 Stop after latent interpolation and latent-vector exploration work in the GUI.
 ```
+
+## Prompt 15 - Final Documentation & Portfolio Audit
+
+```text
+PROMPT 15 - Final Documentation & Portfolio Audit
+
+Inspect the complete repository before making changes.
+
+Goal:
+Perform the final portfolio-readiness audit and close the project.
+
+This is primarily a documentation, QA, and release-readiness task.
+Do not add new features.
+
+1. Final functional audit
+
+Verify the complete implemented workflow:
+
+Fashion-MNIST
+-> AE training
+-> AE reconstruction/evaluation
+-> VAE training
+-> VAE reconstruction/generation
+-> latent interpolation/exploration
+-> AE vs VAE comparison
+-> Tkinter GUI
+
+Verify that previously trained checkpoints can be loaded without retraining.
+
+2. GUI audit
+
+Verify the final GUI behavior:
+
+- AE/VAE selection
+- Small/Medium/Deep presets
+- architecture descriptions
+- checkpoint loading
+- image selection
+- reconstruction
+- VAE random generation
+- interpolation
+- latent sliders
+- correct disabling/gating of VAE-only features
+
+Fix only actual bugs.
+
+Do not redesign or visually polish the GUI unless required for basic usability.
+
+3. Tests
+
+Run the full test suite.
+
+Add tests only if the final audit discovers an important regression gap.
+
+Do not add tests merely to increase the test count.
+
+4. Repository hygiene
+
+Verify:
+
+- dataset is not tracked
+- checkpoints/experiments are not tracked
+- .idea/.venv/caches are not tracked
+- no obsolete/dead generated files are committed
+- repository structure remains understandable
+
+5. README
+
+Make README.md portfolio-ready and concise.
+
+It should clearly explain:
+
+- project purpose
+- Deep Learning component: Convolutional Autoencoder
+- Generative Models component: VAE
+- Fashion-MNIST
+- Small/Medium/Deep presets
+- training/evaluation/generation workflow
+- GUI capabilities
+- how to install/run
+- how to train models explicitly
+- how to load/use existing checkpoints
+- representative outputs/results if suitable artifacts are available
+- project limitations/scope
+
+Include a concise professional disclosure that the project was developed with significant assistance from ChatGPT and Codex.
+
+Do not imply that AI-assisted implementation proves independent mastery of every implementation detail.
+
+6. Documentation consistency
+
+Audit:
+
+- docs/PLAN.md
+- docs/ARCHITECTURE.md
+- docs/PROMPTS_BOOK.md
+
+Ensure they match the final implementation.
+
+Mark completed milestones appropriately.
+
+Do not rewrite historical Prompt Book entries.
+
+7. Portfolio artifacts
+
+If suitable representative reconstruction/generation/comparison images already exist locally and are appropriate for GitHub, copy only a small curated set into a tracked documentation/assets location and reference them from README.
+
+Do not commit:
+
+- datasets
+- checkpoints
+- entire experiment directories
+- large/redundant generated output collections
+
+If no suitable artifacts exist, report that screenshots/demo media remain optional release polish rather than generating large new experiments.
+
+8. Final scope check
+
+Confirm that the project remained focused on:
+
+Deep Learning + Generative Models
+
+and did not accumulate unrelated technologies/features.
+
+Do not add anything solely to make the technology list longer.
+
+9. Prompt Book
+
+Append this prompt to docs/PROMPTS_BOOK.md as:
+
+Prompt 15 - Final Documentation & Portfolio Audit
+
+Preserve all previous entries.
+
+10. Commit
+
+Commit justified final changes with an appropriate commit message.
+
+Final report should contain:
+
+- bugs discovered/fixed
+- final test result
+- documentation/repository changes
+- portfolio artifacts included or still missing
+- whether the repository is functionally complete
+- any remaining issue that genuinely blocks portfolio release
+
+If there are no blocking issues, explicitly state that feature development should stop.
+
+Do not propose additional features after declaring the project complete.
+```

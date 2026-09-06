@@ -288,17 +288,17 @@ GUI policy:
 - Latent interpolation encodes two selected test images, linearly blends their latent mean vectors, and decodes the selected interpolation point.
 - Latent sliders start from an encoded selected image, clamp edited dimensions to bounded values, and decode through the already-loaded VAE.
 
-## Planned Component Boundaries
+## Remaining Component Boundaries
 
-Future implementation should separate these responsibilities:
+Any future maintenance work should preserve these boundaries:
 
 - plotting and visualization helpers
 
 Core infrastructure, Fashion-MNIST data modules, AE and VAE model layers, AE/VAE training, AE reconstruction evaluation, VAE generation/interpolation core, AE vs VAE comparison, basic Tkinter GUI, and latent-space GUI controls exist now.
 
-## Planned Data Flow
+## Implemented Data Flow
 
-At a high level, future runs should follow this flow:
+At a high level, the implemented workflow follows this flow:
 
 1. Load explicit configuration.
 2. Resolve device selection, using GPU when compatible and CPU otherwise.
@@ -315,12 +315,12 @@ At a high level, future runs should follow this flow:
 13. Open a basic Tkinter GUI that loads existing checkpoints, reconstructs test images, and displays VAE random generation.
 14. Use VAE-only GUI controls to interpolate between two selected test images and explore bounded latent-vector edits.
 
-## Deferred Implementation Details
+## Deferred Details
 
-The following are intentionally not decided here:
+The following remain intentionally outside the completed portfolio scope:
 
 - final production hyperparameters
 - complete experiment artifact schema
 - final production GUI polish
 
-These choices belong to later implementation milestones.
+They should not be added without a clear future maintenance or portfolio-revision reason.

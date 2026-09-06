@@ -1,39 +1,41 @@
 # deep_learning-generative_models
 
-Build an interactive portfolio project demonstrating both Deep Learning and Generative Modeling through image reconstruction, latent representations, and generation.
+Portfolio project demonstrating Deep Learning and Generative Modeling on Fashion-MNIST through image reconstruction, latent representations, generation, comparison, and a small Tkinter exploration GUI.
 
-The project emphasizes educational value, clear architecture, reproducible experiments, and understandable model behavior rather than visually impressive generated images.
+The project is intentionally focused: it uses a Convolutional Autoencoder as the Deep Learning reconstruction baseline and a Variational Autoencoder as the generative model. It does not include cloud deployment, authentication, databases, backend APIs, LLM integration, GANs, diffusion models, or unrelated infrastructure.
 
-## Planned progression
+## What It Shows
 
-1. Repository bootstrap
-2. Project design
-3. Core project architecture
-4. Fashion-MNIST data pipeline
-5. Convolutional Autoencoder baseline
-6. Autoencoder training and reconstruction evaluation
-7. Variational Autoencoder (VAE)
-8. VAE training
-9. Latent-space sampling and interpolation
-10. AE vs VAE comparison
-11. Engineering/QA and stabilization
-12. Interactive GUI for exploring trained models and latent space
-13. Portfolio closure
+- Fashion-MNIST image loading with an explicit tensor contract: `[batch, 1, 28, 28]`.
+- Convolutional Autoencoder (AE) training and reconstruction evaluation.
+- Variational Autoencoder (VAE) training with reconstruction and KL-divergence losses.
+- Small, Medium, and Deep fixed architecture presets for both AE and VAE.
+- Checkpoint-based workflows for evaluation, generation, interpolation, comparison, and GUI use.
+- AE vs VAE comparison focused on reconstruction loss, qualitative examples, training-loss behavior, and VAE generation capability.
+- Tkinter GUI for loading existing checkpoints, reconstructing test images, generating VAE samples, interpolating between latent representations, and editing bounded latent dimensions.
 
-## Agreed direction
+## Install
 
-- Technology: Python, PyTorch, torchvision, matplotlib, and pytest.
-- Dataset: Fashion-MNIST, downloaded automatically when needed and cached locally.
-- Data contract: image batches preserve spatial dimensions as `[batch, 1, 28, 28]`.
-- Baseline: Convolutional Autoencoder (AE) for image representation and reconstruction.
-- Generative model: Variational Autoencoder (VAE) for reconstruction training, latent distributions, and later generation/interpolation.
-- AE architecture presets: Small, Medium, and Deep fixed convolutional presets.
+Requirements:
 
-## Current status
+- Python 3.11+
+- `uv`
 
-Repository bootstrap, project design documentation, core infrastructure, the Fashion-MNIST data pipeline, AE/VAE model layers, explicit AE/VAE training, AE reconstruction evaluation, VAE generation/interpolation core, AE vs VAE comparison, the basic Tkinter GUI, and VAE latent-space GUI controls are complete.
+Install the project dependencies and test tools:
 
-Run the infrastructure smoke check from the source tree:
+```bash
+uv sync --extra dev
+```
+
+Run the test suite:
+
+```bash
+uv run pytest
+```
+
+## Run
+
+Smoke-check the package without training:
 
 ```bash
 uv run python -m deep_learning_generative_models
@@ -45,80 +47,103 @@ Inspect the Fashion-MNIST data pipeline:
 uv run python -m deep_learning_generative_models.data_inspect
 ```
 
-Run an explicit lightweight Autoencoder training smoke run:
+Train a lightweight AE explicitly:
 
 ```bash
 uv run python -m deep_learning_generative_models.train --model ae --preset small --epochs 1 --train-subset-size 256 --test-subset-size 64
 ```
 
-Run an explicit lightweight VAE training smoke run:
+Train a lightweight VAE explicitly:
 
 ```bash
 uv run python -m deep_learning_generative_models.train --model vae --preset small --epochs 1 --train-subset-size 256 --test-subset-size 64
 ```
 
-Training only runs when the training command is executed.
+Training runs only when the training command is executed. Importing the package or opening the GUI never starts training.
 
-Evaluate a trained Autoencoder checkpoint:
-
-```bash
-uv run python -m deep_learning_generative_models.evaluate --checkpoint experiments/<experiment-name>/checkpoint.pt --max-samples 128
-```
-
-Evaluation loads an existing checkpoint and writes reconstruction figures, a training-loss plot, and a JSON summary under the same experiment directory.
-
-Generate samples and latent interpolations from a trained VAE checkpoint:
+Evaluate an existing AE checkpoint:
 
 ```bash
-uv run python -m deep_learning_generative_models.generate --checkpoint experiments/<experiment-name>/checkpoint.pt --mode both --count 16 --steps 8 --seed 42
+uv run python -m deep_learning_generative_models.evaluate --checkpoint experiments/<ae-experiment>/checkpoint.pt --max-samples 128
 ```
 
-Generation loads an existing VAE checkpoint and writes generated image grids, latent interpolation figures, and a JSON summary under the same experiment directory.
+Generate VAE samples and latent interpolations from an existing VAE checkpoint:
 
-Compare trained AE and VAE checkpoints:
+```bash
+uv run python -m deep_learning_generative_models.generate --checkpoint experiments/<vae-experiment>/checkpoint.pt --mode both --count 16 --steps 8 --seed 42
+```
+
+Compare existing AE and VAE checkpoints:
 
 ```bash
 uv run python -m deep_learning_generative_models.compare --ae-checkpoint experiments/<ae-experiment>/checkpoint.pt --vae-checkpoint experiments/<vae-experiment>/checkpoint.pt --max-samples 128 --generated-count 16 --seed 42
 ```
 
-Comparison loads existing checkpoints, evaluates reconstruction on the same Fashion-MNIST test policy, saves representative outputs, and summarizes the reconstruction-vs-generative tradeoff.
-
-Open the basic Tkinter model explorer:
+Open the Tkinter model explorer:
 
 ```bash
 uv run python -m deep_learning_generative_models.gui
 ```
 
-The GUI is intended as an educational exploration layer over working models, not as the main purpose of the project. It can reconstruct selected Fashion-MNIST examples, generate random VAE samples, interpolate between two selected images with a loaded VAE, and decode bounded latent-vector slider edits. Training does not run automatically when the GUI is opened.
+The GUI is an educational layer over trained models. It supports AE/VAE selection, preset descriptions, compatible checkpoint loading, Fashion-MNIST test-image browsing, reconstruction display, VAE random generation, latent interpolation, and bounded latent-vector slider edits.
 
-Cloud deployment, authentication, databases, backend APIs, LLM integration, TensorFlow, GANs, diffusion models, transformers, unrelated AI features, and unnecessary infrastructure are outside the current scope unless later justified.
+## Example Smoke Outputs
 
-## AI assistance disclosure
+These images were produced from short local smoke runs and are included to show the artifact pipeline, not final model quality.
 
-This project is being developed with significant assistance from ChatGPT and Codex for planning, documentation, code generation, review, and repository maintenance. That assistance should not be interpreted as equivalent to the author's independent implementation ability.
+The final audit comparison smoke run evaluated 16 Fashion-MNIST samples on CPU with existing checkpoints: AE reconstruction loss `0.185039`, VAE reconstruction loss `0.177022`.
 
-## Project layout
+AE reconstruction smoke output:
+
+![AE reconstruction smoke output](docs/assets/ae_reconstructions.png)
+
+VAE random generation smoke output:
+
+![VAE generated smoke output](docs/assets/vae_generated_grid.png)
+
+VAE latent interpolation smoke output:
+
+![VAE latent interpolation smoke output](docs/assets/vae_latent_interpolation.png)
+
+AE vs VAE reconstruction comparison smoke output:
+
+![AE vs VAE reconstruction comparison smoke output](docs/assets/ae_vs_vae_reconstruction_comparison.png)
+
+## Project Layout
 
 ```text
 src/deep_learning_generative_models/
   config.py
-  device.py
-  experiments.py
-  paths.py
-  reproducibility.py
   data.py
-  data_inspect.py
-  models.py
-  train.py
+  device.py
   evaluate.py
+  experiments.py
   generate.py
   compare.py
   gui.py
-tests/
+  models.py
+  paths.py
+  reproducibility.py
+  train.py
 configs/
   default.json
 docs/
-  PLAN.md
   ARCHITECTURE.md
+  PLAN.md
   PROMPTS_BOOK.md
+  assets/
+tests/
 ```
+
+Local datasets, checkpoints, experiment directories, caches, IDE files, and virtual environments are ignored by Git.
+
+## Limitations
+
+- Fashion-MNIST is the only dataset used.
+- The included example outputs come from deliberately short smoke runs.
+- The GUI loads and explores existing checkpoints; it does not train models.
+- The project is not a production ML system and does not include serving, authentication, databases, cloud deployment, or web APIs.
+
+## AI Assistance Disclosure
+
+This project was developed with significant assistance from ChatGPT and Codex for planning, documentation, code generation, review, and repository maintenance. That assistance should not be interpreted as proof of independent mastery of every implementation detail.
