@@ -471,3 +471,90 @@ You may commit the completed work with an appropriate commit message.
 
 Stop after the VAE model layer is complete. Do not begin VAE training.
 ```
+
+## Prompt 9 - VAE Training Integration
+
+```text
+PROMPT 9 — VAE Training Integration
+
+Inspect the existing repository and follow the established architecture and documentation.
+
+Goal:
+Integrate VAE training into the existing training pipeline without duplicating the AE training system.
+
+Requirements:
+
+1. Extend the current shared training pipeline to support:
+
+   - AE
+   - VAE
+
+2. For VAE training implement the standard loss:
+
+   - reconstruction loss
+   - KL-divergence loss
+   - total VAE loss
+
+Keep the loss implementation explicit and easy to understand.
+
+3. Persist VAE training history including:
+
+   - total loss
+   - reconstruction loss
+   - KL loss
+
+4. Use the existing:
+
+   - configuration
+   - device selection
+   - seeds
+   - Fashion-MNIST pipeline
+   - experiment directories
+   - checkpoint system
+
+Do not create parallel infrastructure unnecessarily.
+
+5. VAE checkpoints must contain enough metadata to reconstruct and load the correct model later.
+
+6. Training must remain explicit. Opening/importing the project must never trigger training.
+
+7. Add focused, fast tests for:
+
+   - VAE loss
+   - VAE training step
+   - checkpoint creation/loading metadata
+   - persisted loss history
+   - regression of existing AE training behavior
+
+Do not require CUDA or long dataset training in unit tests.
+
+8. Run one lightweight real VAE smoke training using Fashion-MNIST, preferably Small + small subset + 1 epoch.
+
+Do not perform a long/full training run yet.
+
+9. Update README/PLAN/ARCHITECTURE only where the implemented behavior makes an update necessary.
+
+10. Append this prompt to docs/PROMPTS_BOOK.md as:
+
+Prompt 9 — VAE Training Integration
+
+Preserve all previous entries.
+
+Do NOT implement yet:
+
+- random generation workflow
+- latent interpolation
+- AE vs VAE experiments
+- GUI
+
+Run the relevant/full test suite and commit the completed work.
+
+Final report should be short and contain only:
+
+- main changes
+- test results
+- VAE smoke-training result
+- any problem, design deviation, or decision requiring attention
+
+Stop after VAE training works end-to-end.
+```

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document records current core infrastructure, the Fashion-MNIST data boundary, Autoencoder and Variational Autoencoder model layers, Autoencoder training, AE reconstruction evaluation, and intended future component boundaries. It does not describe VAE training, generation workflows, latent interpolation workflows, or GUI implementation.
+This document records current core infrastructure, the Fashion-MNIST data boundary, Autoencoder and Variational Autoencoder model layers, AE/VAE training, AE reconstruction evaluation, and intended future component boundaries. It does not describe generation workflows, latent interpolation workflows, or GUI implementation.
 
 ## Decisions Already Made
 
@@ -123,40 +123,47 @@ VAE presets use the same convolutional channel progression as the AE presets:
 
 The VAE differs from the AE by using separate linear heads for `mu` and `logvar`. It shares the same fixed preset philosophy and the same `7x7` encoded spatial feature size before latent projection.
 
-## Implemented AE Training Boundary
+## Implemented Training Boundary
 
 Current training module:
 
-- `train.py`: explicit package-style Autoencoder training command, reusable one-epoch loop, full AE training orchestration, checkpoint saving/loading, and CSV history persistence.
+- `train.py`: explicit package-style AE/VAE training command, reusable epoch loops, model-specific loss computation, checkpoint saving/loading, and CSV history persistence.
 
 Training command:
 
 ```bash
 uv run python -m deep_learning_generative_models.train --model ae
+uv run python -m deep_learning_generative_models.train --model vae
 ```
 
 Training occurs only when this command is run. Importing the package or opening the project does not start training.
 
 Training policy:
 
-- model type must be `ae`
-- reconstruction loss is mean squared error
+- supported model types are `ae` and `vae`
+- AE reconstruction loss is mean squared error
+- VAE total loss is reconstruction loss plus KL-divergence loss
+- VAE reconstruction loss is mean squared error
+- VAE KL loss is `-0.5 * mean(sum(1 + logvar - mu^2 - exp(logvar)))`
 - optimizer is Adam using the configured learning rate
 - images are moved to the selected device
-- training history records average per-example reconstruction loss by epoch
+- AE training history records average per-example reconstruction loss by epoch
+- VAE training history records average total loss, reconstruction loss, and KL loss by epoch
 
-MSE is used because Fashion-MNIST inputs are grayscale tensors in `[0.0, 1.0]`, not binary targets. The AE decoder uses `Sigmoid`, so outputs remain bounded for reconstruction.
+MSE is used because Fashion-MNIST inputs are grayscale tensors in `[0.0, 1.0]`, not binary targets. AE and VAE decoders use `Sigmoid`, so outputs remain bounded for reconstruction.
 
 Checkpoint contract:
 
 - checkpoint file: `checkpoint.pt`
 - format: `torch.save` dictionary with `state_dict`, not a serialized model object
 - includes model type, architecture preset, latent dimension, epoch count, resolved config, training history, and model weights
+- VAE checkpoints include enough metadata to reconstruct the selected VAE preset through the shared model factory
 
 History contract:
 
 - history file: `training_history.csv`
-- columns: `epoch`, `train_reconstruction_loss`
+- AE columns: `epoch`, `train_reconstruction_loss`
+- VAE columns: `epoch`, `train_loss`, `train_reconstruction_loss`, `train_kl_loss`
 
 Training artifacts are stored in the experiment directory and remain ignored by Git under `experiments/`.
 
@@ -194,13 +201,12 @@ The evaluation summary includes checkpoint path, model type, architecture preset
 
 Future implementation should separate these responsibilities:
 
-- VAE training
 - AE vs VAE comparison
 - generation and latent-space utilities
 - plotting and visualization helpers
 - later GUI exploration layer
 
-Core infrastructure, Fashion-MNIST data modules, AE and VAE model layers, AE training, and AE reconstruction evaluation exist now. VAE training, generation, visualization, GUI, and comparison modules should be introduced when their milestone begins.
+Core infrastructure, Fashion-MNIST data modules, AE and VAE model layers, AE/VAE training, and AE reconstruction evaluation exist now. Generation, visualization, GUI, and comparison modules should be introduced when their milestone begins.
 
 ## Planned Data Flow
 
@@ -215,14 +221,13 @@ At a high level, future runs should follow this flow:
 7. Build a Convolutional Autoencoder from the selected architecture preset when a future command needs the AE.
 8. Train the AE only through an explicit training command and save checkpoint/history artifacts.
 9. Evaluate trained AE checkpoints without retraining and save reconstruction artifacts.
-10. Build a VAE from the selected architecture preset when a future command needs the VAE.
-11. Later milestones will add VAE training, generation, AE vs VAE comparison, and GUI exploration.
+10. Train the VAE only through an explicit training command and save checkpoint/history artifacts.
+11. Later milestones will add generation, latent interpolation, AE vs VAE comparison, and GUI exploration.
 
 ## Deferred Implementation Details
 
 The following are intentionally not decided here:
 
-- VAE loss composition and training loop
 - final production hyperparameters
 - complete experiment artifact schema
 - GUI framework

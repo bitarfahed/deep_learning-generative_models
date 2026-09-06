@@ -13,11 +13,12 @@ The project emphasizes educational value, clear architecture, reproducible exper
 5. Convolutional Autoencoder baseline
 6. Autoencoder training and reconstruction evaluation
 7. Variational Autoencoder (VAE)
-8. VAE training, latent-space sampling, and interpolation
-9. AE vs VAE comparison
-10. Engineering/QA and stabilization
-11. Interactive GUI for exploring trained models and latent space
-12. Portfolio closure
+8. VAE training
+9. Latent-space sampling and interpolation
+10. AE vs VAE comparison
+11. Engineering/QA and stabilization
+12. Interactive GUI for exploring trained models and latent space
+13. Portfolio closure
 
 ## Agreed direction
 
@@ -25,12 +26,12 @@ The project emphasizes educational value, clear architecture, reproducible exper
 - Dataset: Fashion-MNIST, downloaded automatically when needed and cached locally.
 - Data contract: image batches preserve spatial dimensions as `[batch, 1, 28, 28]`.
 - Baseline: Convolutional Autoencoder (AE) for image representation and reconstruction.
-- Generative model: Variational Autoencoder (VAE) model layer for reconstruction, latent distributions, sampling via reparameterization, and later training/generation/interpolation.
+- Generative model: Variational Autoencoder (VAE) for reconstruction training, latent distributions, and later generation/interpolation.
 - AE architecture presets: Small, Medium, and Deep fixed convolutional presets.
 
 ## Current status
 
-Repository bootstrap, project design documentation, core infrastructure, the Fashion-MNIST data pipeline, the Convolutional Autoencoder model layer, explicit Autoencoder training, AE reconstruction evaluation, and the VAE model layer are complete. VAE training, generation utilities, latent interpolation workflows, and GUI code have not been implemented yet.
+Repository bootstrap, project design documentation, core infrastructure, the Fashion-MNIST data pipeline, the Convolutional Autoencoder model layer, explicit Autoencoder training, AE reconstruction evaluation, the VAE model layer, and explicit VAE training are complete. Generation utilities, latent interpolation workflows, and GUI code have not been implemented yet.
 
 Run the infrastructure smoke check from the source tree:
 
@@ -48,6 +49,12 @@ Run an explicit lightweight Autoencoder training smoke run:
 
 ```bash
 uv run python -m deep_learning_generative_models.train --model ae --preset small --epochs 1 --train-subset-size 256 --test-subset-size 64
+```
+
+Run an explicit lightweight VAE training smoke run:
+
+```bash
+uv run python -m deep_learning_generative_models.train --model vae --preset small --epochs 1 --train-subset-size 256 --test-subset-size 64
 ```
 
 Training only runs when the training command is executed.
