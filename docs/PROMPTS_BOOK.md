@@ -630,3 +630,79 @@ Final report should contain only:
 
 Stop after generation and latent interpolation work without GUI.
 ```
+
+## Prompt 11 - AE vs VAE Experiments & Comparison
+
+```text
+PROMPT 11 — AE vs VAE Experiments & Comparison
+
+Inspect the repository and follow the existing architecture/documentation.
+
+Goal:
+Add a small, reproducible comparison workflow between the existing AE and VAE.
+
+Requirements:
+
+1. Compare AE and VAE under reasonably comparable conditions:
+
+   - same Fashion-MNIST data policy
+   - same architecture preset where practical
+   - same seed
+   - comparable training settings
+
+2. Compare only what is meaningful for this project:
+
+   - test reconstruction loss
+   - qualitative reconstruction examples
+   - training-loss behavior
+   - VAE generation capability
+
+Do not add unnecessary metrics.
+
+3. Produce a concise experiment summary containing:
+   - configurations used
+   - AE reconstruction loss
+   - VAE reconstruction loss
+   - links/paths to representative outputs
+   - a short factual comparison
+
+Do not automatically claim one model is "better"; explain the reconstruction-vs-generative tradeoff shown by the results.
+
+4. Reuse existing training, evaluation, checkpoint, and artifact infrastructure.
+   Do not duplicate pipelines.
+
+5. Keep experiment runs configurable and reproducible.
+   Do not require long training as part of normal execution.
+
+6. Add focused tests for the comparison/result aggregation logic.
+   Do not test model quality in unit tests.
+
+7. Perform a lightweight end-to-end comparison using available checkpoints where possible.
+   Do not retrain models unnecessarily.
+
+8. Update documentation only where necessary.
+
+9. Append this prompt to docs/PROMPTS_BOOK.md as:
+
+Prompt 11 — AE vs VAE Experiments & Comparison
+
+Preserve all previous entries.
+
+Do NOT implement:
+
+- GUI
+- new model families
+- hyperparameter search
+- large experiment suites
+
+Run the relevant/full test suite and commit the completed work.
+
+Final report should contain only:
+
+- main changes
+- tests/results
+- comparison result
+- any problem or decision requiring attention
+
+Stop after the AE vs VAE comparison workflow works.
+```

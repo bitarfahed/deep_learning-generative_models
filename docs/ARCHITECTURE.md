@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document records current core infrastructure, the Fashion-MNIST data boundary, Autoencoder and Variational Autoencoder model layers, AE/VAE training, AE reconstruction evaluation, VAE generation/interpolation core, and intended future component boundaries. It does not describe GUI implementation or AE vs VAE experiment suites.
+This document records current core infrastructure, the Fashion-MNIST data boundary, Autoencoder and Variational Autoencoder model layers, AE/VAE training, AE reconstruction evaluation, VAE generation/interpolation core, AE vs VAE comparison, and intended future component boundaries. It does not describe GUI implementation or large experiment suites.
 
 ## Decisions Already Made
 
@@ -231,15 +231,46 @@ Generation outputs are stored under the checkpoint experiment directory:
 
 The generation summary includes checkpoint path, model type, architecture preset, latent dimension, device, mode, generated sample count, interpolation step count, selected interpolation indices, and generated artifact paths.
 
+## Implemented AE vs VAE Comparison Boundary
+
+Current comparison module:
+
+- `compare.py`: explicit package-style comparison command, shared checkpoint loading, shared Fashion-MNIST test evaluation, reconstruction comparison plotting, training-loss comparison plotting, VAE generation output, and JSON summary persistence.
+
+Comparison command:
+
+```bash
+uv run python -m deep_learning_generative_models.compare --ae-checkpoint experiments/<ae-experiment>/checkpoint.pt --vae-checkpoint experiments/<vae-experiment>/checkpoint.pt
+```
+
+Comparison occurs only when this command is run. It does not retrain either model.
+
+Comparison policy:
+
+- AE and VAE checkpoints are loaded from existing `checkpoint.pt` files.
+- Both models are evaluated on the same Fashion-MNIST test loader policy.
+- Optional `--max-samples` keeps smoke comparisons short and explicit.
+- The comparison records test reconstruction loss for each model.
+- Representative original/AE/VAE reconstructions are saved in one figure.
+- Existing checkpoint training histories are plotted when present.
+- VAE prior samples are generated to show capability beyond reconstruction.
+- The summary explains the reconstruction-vs-generative tradeoff factually without claiming a universal winner.
+
+Comparison outputs are stored under a local ignored experiment directory:
+
+- `comparison_summary.json`
+- `reconstruction_comparison.png`
+- `training_loss_comparison.png`
+- `vae_generated_grid.png`
+
 ## Planned Component Boundaries
 
 Future implementation should separate these responsibilities:
 
-- AE vs VAE comparison
 - plotting and visualization helpers
 - later GUI exploration layer
 
-Core infrastructure, Fashion-MNIST data modules, AE and VAE model layers, AE/VAE training, AE reconstruction evaluation, and VAE generation/interpolation core exist now. GUI and comparison modules should be introduced when their milestone begins.
+Core infrastructure, Fashion-MNIST data modules, AE and VAE model layers, AE/VAE training, AE reconstruction evaluation, VAE generation/interpolation core, and AE vs VAE comparison exist now. GUI modules should be introduced when their milestone begins.
 
 ## Planned Data Flow
 
@@ -256,7 +287,8 @@ At a high level, future runs should follow this flow:
 9. Evaluate trained AE checkpoints without retraining and save reconstruction artifacts.
 10. Train the VAE only through an explicit training command and save checkpoint/history artifacts.
 11. Generate VAE samples and latent interpolations only from an existing VAE checkpoint.
-12. Later milestones will add AE vs VAE comparison and GUI exploration.
+12. Compare existing AE and VAE checkpoints without retraining.
+13. Later milestones will add GUI exploration.
 
 ## Deferred Implementation Details
 

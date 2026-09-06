@@ -31,7 +31,7 @@ The project emphasizes educational value, clear architecture, reproducible exper
 
 ## Current status
 
-Repository bootstrap, project design documentation, core infrastructure, the Fashion-MNIST data pipeline, AE/VAE model layers, explicit AE/VAE training, AE reconstruction evaluation, and VAE generation/interpolation core are complete. AE vs VAE comparison and GUI code have not been implemented yet.
+Repository bootstrap, project design documentation, core infrastructure, the Fashion-MNIST data pipeline, AE/VAE model layers, explicit AE/VAE training, AE reconstruction evaluation, VAE generation/interpolation core, and AE vs VAE comparison are complete. GUI code has not been implemented yet.
 
 Run the infrastructure smoke check from the source tree:
 
@@ -74,6 +74,14 @@ uv run python -m deep_learning_generative_models.generate --checkpoint experimen
 ```
 
 Generation loads an existing VAE checkpoint and writes generated image grids, latent interpolation figures, and a JSON summary under the same experiment directory.
+
+Compare trained AE and VAE checkpoints:
+
+```bash
+uv run python -m deep_learning_generative_models.compare --ae-checkpoint experiments/<ae-experiment>/checkpoint.pt --vae-checkpoint experiments/<vae-experiment>/checkpoint.pt --max-samples 128 --generated-count 16 --seed 42
+```
+
+Comparison loads existing checkpoints, evaluates reconstruction on the same Fashion-MNIST test policy, saves representative outputs, and summarizes the reconstruction-vs-generative tradeoff.
 
 The future GUI is intended as an educational exploration layer over working models, not as the main purpose of the project. Training must not run automatically just because the GUI/application is opened.
 
