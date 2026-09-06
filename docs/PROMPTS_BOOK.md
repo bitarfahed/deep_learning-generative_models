@@ -210,3 +210,71 @@ You may commit the completed work with an appropriate commit message.
 
 Stop after the Fashion-MNIST data pipeline is working. Do not begin the Autoencoder implementation.
 ```
+
+## Prompt 5 - Convolutional Autoencoder Model
+
+```text
+PROMPT 5 — Convolutional Autoencoder Model
+
+Inspect the current repository before making any changes.
+
+This task is ONLY to implement the Convolutional Autoencoder model layer.
+
+Do NOT implement:
+- training loops
+- optimizer logic
+- experiment execution
+- evaluation pipelines
+- VAE logic
+- random generation
+- latent interpolation
+- GUI
+
+Reuse the existing project architecture, configuration system, Fashion-MNIST data contract, and package structure.
+
+Goal:
+Implement a clean Convolutional Autoencoder (AE) suitable for Fashion-MNIST.
+
+The model must accept image tensors shaped [batch, 1, 28, 28], encode images into a latent representation, decode the latent representation back into reconstructed images, preserve the original image shape, and support fixed architecture presets small, medium, and deep.
+
+The AE is the Deep Learning baseline for the project and will later be compared with the VAE.
+
+Inspect existing contracts before implementing: configs/default.json, the Fashion-MNIST data module, docs/ARCHITECTURE.md, current config validation, and package naming/conventions. Do not duplicate existing abstractions.
+
+Architecture presets:
+Define three fixed model presets: small, medium, and deep. The user may select one preset but cannot arbitrarily edit its internal structure. Choose reasonable Fashion-MNIST preset definitions that increase progressively in capacity/depth, remain lightweight enough for local CPU development, are not unnecessarily large, and keep output reconstruction shape exactly 1 x 28 x 28. Prefer convolutional encoder blocks and a mirrored or logically corresponding decoder. Choose and document channel counts, kernel sizes, strides, and latent dimensions deliberately. Avoid residual networks, attention, transformers, pretrained models, unnecessary normalization layers, and architectural tricks without clear value.
+
+Latent representation:
+The Autoencoder should expose encode(x) -> z, decode(z) -> reconstruction, and forward(x) -> reconstruction. Use config latent_dim consistently where appropriate. Do not implement VAE statistics such as mu, logvar, sampling, or KL divergence.
+
+Output range:
+Choose a reconstruction output activation compatible with Fashion-MNIST preprocessing. Since inputs are in [0, 1], a sigmoid output is appropriate. Keep model and future reconstruction loss mathematically consistent. Do not change data preprocessing unless a real incompatibility is discovered.
+
+Shape safety:
+Input must be [batch, 1, 28, 28] and output must be [batch, 1, 28, 28] for all three presets. Avoid fragile hard-coded shape assumptions when a cleaner solution is available, but do not over-engineer dynamic shape handling for datasets outside the project scope.
+
+Model factory:
+Implement a small mechanism for constructing the selected AE preset from existing configuration. At this stage only AE needs to be constructible, while leaving the structure extensible enough for the VAE to be added later without duplicating preset-selection logic.
+
+Human-readable architecture description:
+Provide concise programmatic descriptions for each architecture because the future GUI will display them. Descriptions should reflect the actual implementation and should not expose mutable architecture parameters to the user.
+
+Tests:
+Add focused pytest tests for small, medium, and deep preset construction; forward pass shape; encode output shape; decode output shape; output value range if bounded activation is used; invalid architecture preset handling; and model factory behavior. Use small synthetic tensors. Do not require Fashion-MNIST download, GPU, training, or long-running operations.
+
+Parameter counts:
+Provide a lightweight utility or model property to report trainable parameter count. Use it in verification to compare Small / Medium / Deep. The expected relation should generally be small < medium < deep; reconsider preset design if that relation is not produced.
+
+Documentation:
+Update docs/ARCHITECTURE.md with actual AE encoder/decoder design, Small / Medium / Deep presets, latent representation, and input/output tensor contract. Update docs/PLAN.md milestone status if appropriate. Update README.md only with a concise model overview if useful. Do not describe training results because training has not been implemented.
+
+Prompt Book:
+Append this exact development prompt, or a faithful preserved copy, to docs/PROMPTS_BOOK.md. Append only, preserve previous entries, maintain chronological order, and identify this entry as Prompt 5 — Convolutional Autoencoder Model. Do not rewrite earlier prompts.
+
+Verification:
+Before finishing, run the full relevant pytest suite, instantiate Small/Medium/Deep AE presets, run synthetic forward passes through all three, verify input/output shapes, verify latent shapes, verify architecture descriptions match implementation, report trainable parameter counts for all presets, verify sensible capacity progression, verify no training/VAE/generation/GUI implementation was added, and inspect Git status.
+
+You may commit the completed work with an appropriate commit message.
+
+Stop after the Convolutional Autoencoder model layer is complete. Do not begin Autoencoder training.
+```

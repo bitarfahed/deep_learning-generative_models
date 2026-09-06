@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document records current core infrastructure, the Fashion-MNIST data boundary, and intended future component boundaries. It does not describe model, training, evaluation, generation, or GUI implementation.
+This document records current core infrastructure, the Fashion-MNIST data boundary, the Convolutional Autoencoder model layer, and intended future component boundaries. It does not describe training, evaluation, VAE, generation, or GUI implementation.
 
 ## Decisions Already Made
 
@@ -49,18 +49,51 @@ DataLoader policy:
 
 Optional development subsets are configured explicitly through `train_subset_size` and `test_subset_size`. `null` means the full split is used.
 
+## Implemented AE Model Boundary
+
+Current model module:
+
+- `models.py`: Convolutional Autoencoder presets, model construction, encode/decode/forward interface, human-readable preset descriptions, and trainable parameter counting.
+
+The AE accepts Fashion-MNIST image tensors shaped `[batch, 1, 28, 28]`.
+
+Model interface:
+
+- `encode(x) -> z`
+- `decode(z) -> reconstruction`
+- `forward(x) -> reconstruction`
+
+Latent representation policy:
+
+- `latent_dim` comes from the shared experiment configuration.
+- The AE latent output shape is `[batch, latent_dim]`.
+- No VAE-specific `mu`, `logvar`, sampling, or KL-divergence behavior exists in the AE.
+
+Output contract:
+
+- Reconstruction shape: `[batch, 1, 28, 28]`
+- Reconstruction value range: `[0.0, 1.0]`
+- The decoder ends with `Sigmoid`, matching Fashion-MNIST tensors produced by `ToTensor()`.
+
+AE presets:
+
+- Small: encoder channels `(16, 32)`, two stride-2 convolutional blocks, compact baseline.
+- Medium: encoder channels `(16, 32, 64)`, two stride-2 blocks plus one stride-1 capacity block.
+- Deep: encoder channels `(32, 64, 128, 128)`, two stride-2 blocks plus two stride-1 capacity blocks.
+
+All presets encode to a `7x7` spatial feature map before the linear latent projection. Decoders use corresponding convolutional refinement followed by two transposed-convolution upsampling stages back to `28x28`.
+
 ## Planned Component Boundaries
 
 Future implementation should separate these responsibilities:
 
-- model definitions
 - training orchestration
 - evaluation and comparison
 - generation and latent-space utilities
 - plotting and visualization helpers
 - later GUI exploration layer
 
-Core infrastructure and Fashion-MNIST data modules exist now. Model, training, evaluation, generation, visualization, and GUI modules should be introduced when their milestone begins.
+Core infrastructure, Fashion-MNIST data modules, and the AE model layer exist now. Training, evaluation, VAE, generation, visualization, and GUI modules should be introduced when their milestone begins.
 
 ## Planned Data Flow
 
@@ -72,14 +105,15 @@ At a high level, future runs should follow this flow:
 4. Create an experiment directory.
 5. Save resolved configuration and metadata.
 6. Load Fashion-MNIST DataLoaders when a future command needs data.
-7. Later milestones will add model construction, training, checkpoints, metrics, plots, and GUI exploration.
+7. Build a Convolutional Autoencoder from the selected architecture preset when a future command needs the AE.
+8. Later milestones will add training, checkpoints, metrics, plots, VAE behavior, generation, and GUI exploration.
 
 ## Deferred Implementation Details
 
 The following are intentionally not decided here:
 
-- exact neural-network layers
-- channel counts and latent dimensions
+- VAE neural-network layers
+- VAE channel counts and latent policy
 - final hyperparameters
 - complete experiment artifact schema
 - GUI framework

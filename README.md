@@ -22,15 +22,15 @@ The project emphasizes educational value, clear architecture, reproducible exper
 ## Agreed direction
 
 - Technology: Python, PyTorch, torchvision, matplotlib, and pytest.
-- Dataset: Fashion-MNIST, downloaded automatically later when needed and cached locally.
+- Dataset: Fashion-MNIST, downloaded automatically when needed and cached locally.
 - Data contract: image batches preserve spatial dimensions as `[batch, 1, 28, 28]`.
 - Baseline: Convolutional Autoencoder (AE) for image representation and reconstruction.
 - Generative model: Variational Autoencoder (VAE) for reconstruction, sampling, generation, interpolation, and later interactive latent-space exploration.
-- Architecture presets: Small, Medium, and Deep fixed presets, with implementation details deferred until model implementation.
+- AE architecture presets: Small, Medium, and Deep fixed convolutional presets.
 
 ## Current status
 
-Repository bootstrap, project design documentation, core infrastructure, and the Fashion-MNIST data pipeline are complete. Neural network architectures, training loops, evaluation logic, generation utilities, and GUI code have not been implemented yet.
+Repository bootstrap, project design documentation, core infrastructure, the Fashion-MNIST data pipeline, and the Convolutional Autoencoder model layer are complete. Training loops, evaluation logic, VAE logic, generation utilities, and GUI code have not been implemented yet.
 
 Run the infrastructure smoke check from the source tree:
 
@@ -63,6 +63,7 @@ src/deep_learning_generative_models/
   reproducibility.py
   data.py
   data_inspect.py
+  models.py
 tests/
 configs/
   default.json
