@@ -86,3 +86,63 @@ You may commit the completed documentation work with an appropriate commit messa
 
 Stop after this documentation/design task. Do not begin the Core Project Architecture implementation.
 ```
+
+## Prompt 3 - Core Project Architecture
+
+```text
+PROMPT 3 — Core Project Architecture
+
+Inspect the current repository before making any changes.
+
+This task is to implement the minimal shared project infrastructure needed before adding the Fashion-MNIST data pipeline or any neural-network model.
+
+Do NOT implement:
+- dataset downloading/loading
+- Autoencoder
+- VAE
+- training loops
+- evaluation
+- generation
+- GUI
+
+Follow the existing project design in README.md, docs/PLAN.md, and docs/ARCHITECTURE.md. Do not change the agreed project scope unless a concrete implementation issue requires a small correction.
+
+Goal:
+Create a clean, minimal core architecture that future prompts can reuse for configuration, device selection, reproducibility, project paths, experiment directories, and persisted experiment metadata. Avoid over-engineering.
+
+Inspect the existing package structure and pyproject.toml. Use the repository's existing package naming and structure where possible. Do not create duplicate package roots or unnecessary abstractions.
+
+Configuration system:
+Implement a small explicit configuration system representing at minimum model type ae/vae, architecture preset small/medium/deep, epochs, batch size, learning rate, latent dimension where applicable, and random seed. Use a simple built-in format such as JSON unless the repository justifies another lightweight format. Avoid configuration framework dependencies. Provide a default configuration for later development runs. Validation should reject invalid model type, invalid architecture preset, non-positive epochs, batch size, learning rate, and latent dimension. Do not define internal neural-network architecture of presets.
+
+Device selection:
+Implement a small utility that detects CUDA availability through the installed PyTorch environment, uses CUDA when available, otherwise falls back cleanly to CPU, exposes the selected torch.device, and provides a concise human-readable device description. Do not reinstall PyTorch or modify GPU drivers/toolchain.
+
+Reproducibility:
+Implement seed initialization for Python random, PyTorch, and CUDA seeds when CUDA is available. Use deterministic settings only where practical and do not falsely claim perfect reproducibility across hardware/backends.
+
+Project paths:
+Create centralized minimal pathlib utilities for project root, local data directory, local artifacts directory, experiment directory root, and documentation/results locations where appropriate. Paths must avoid hard-coded machine-specific absolute paths. Downloaded data, checkpoints, and experiment artifacts should remain compatible with .gitignore.
+
+Experiment management:
+Implement lightweight experiment-directory creation. Each experiment receives its own directory using readable unique naming based on timestamp, model type, architecture preset, or similar. Avoid collisions. Save resolved experiment configuration and basic metadata including experiment name/id, selected device, seed, model type, architecture preset, and creation timestamp. Do not implement metrics logging, checkpoints, plots, or model outputs.
+
+Minimal CLI / smoke entry point:
+Add only a minimal way to verify infrastructure from the terminal. It may load the default config, resolve the device, set the seed, create an experiment directory, save config/metadata, and print a concise summary. Do not implement training. Prefer package-style execution and keep the CLI small.
+
+Tests:
+Add focused pytest coverage for deterministic infrastructure behavior, including valid configuration loading, invalid configuration rejection, path resolution, experiment directory creation, saved config/metadata, CPU fallback behavior without requiring CUDA, and seed utility behavior. Keep tests fast and avoid GPU-dependent tests.
+
+Documentation:
+Update documentation only where implementation now makes planned architecture concrete. Update docs/ARCHITECTURE.md if actual module boundaries differ, docs/PLAN.md milestone status if appropriate, and README.md only if a small run command or project-structure note is useful. Do not expand documentation unnecessarily.
+
+Prompt Book:
+Append this exact development prompt, or a faithful preserved copy, to docs/PROMPTS_BOOK.md. Preserve previous entries, append only, maintain chronological order, identify the entry as Prompt 3 — Core Project Architecture, and do not rewrite Prompt 2.
+
+Verification:
+Before finishing, run the relevant pytest suite, run the infrastructure smoke command, inspect the created experiment output, verify configuration and metadata were persisted correctly, verify heavy/local artifacts remain ignored by Git, verify no dataset was downloaded, verify no model/training/evaluation/generation/GUI implementation was added, and inspect Git status.
+
+You may commit the completed work with an appropriate commit message.
+
+Stop after the core infrastructure is working. Do not begin the Fashion-MNIST data pipeline.
+```

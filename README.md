@@ -29,7 +29,13 @@ The project emphasizes educational value, clear architecture, reproducible exper
 
 ## Current status
 
-Repository bootstrap and project design documentation are complete. Neural network architectures, dataset loading, training loops, evaluation logic, generation utilities, and GUI code have not been implemented yet.
+Repository bootstrap, project design documentation, and core infrastructure are complete. Neural network architectures, dataset loading, training loops, evaluation logic, generation utilities, and GUI code have not been implemented yet.
+
+Run the infrastructure smoke check from the source tree:
+
+```bash
+uv run python -m deep_learning_generative_models
+```
 
 The future GUI is intended as an educational exploration layer over working models, not as the main purpose of the project. Training must not run automatically just because the GUI/application is opened.
 
@@ -43,7 +49,14 @@ This project is being developed with significant assistance from ChatGPT and Cod
 
 ```text
 src/deep_learning_generative_models/
+  config.py
+  device.py
+  experiments.py
+  paths.py
+  reproducibility.py
 tests/
+configs/
+  default.json
 docs/
   PLAN.md
   ARCHITECTURE.md

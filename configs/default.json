@@ -1,0 +1,9 @@
+{
+  "model_type": "ae",
+  "architecture_preset": "small",
+  "epochs": 2,
+  "batch_size": 64,
+  "learning_rate": 0.001,
+  "latent_dim": 16,
+  "random_seed": 42
+}

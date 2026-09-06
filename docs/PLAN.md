@@ -175,8 +175,8 @@ Unless a later prompt explicitly changes the scope, do not add:
 ## Milestone Sequence
 
 1. Repository bootstrap and Git cleanup - completed
-2. Project design documentation - current task
-3. Core project architecture
+2. Project design documentation - completed
+3. Core project architecture - current task
 4. Fashion-MNIST data pipeline
 5. Convolutional Autoencoder model
 6. Autoencoder training
@@ -198,4 +198,4 @@ This project is being developed with significant assistance from ChatGPT and Cod
 
 ## Next Step
 
-The next milestone is Core Project Architecture. It should define project modules and interfaces without implementing models, dataset loading, training, evaluation, generation, or GUI behavior prematurely.
+The next milestone is Fashion-MNIST data pipeline. It should add dataset download/loading behavior without implementing models, training loops, evaluation, generation, or GUI behavior prematurely.
