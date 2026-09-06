@@ -32,6 +32,8 @@ def test_load_default_config() -> None:
         ("batch_size", 0),
         ("learning_rate", 0),
         ("latent_dim", 0),
+        ("train_subset_size", 0),
+        ("test_subset_size", 0),
     ],
 )
 def test_invalid_config_values_are_rejected(field: str, value: object) -> None:
@@ -43,11 +45,30 @@ def test_invalid_config_values_are_rejected(field: str, value: object) -> None:
         "learning_rate": 0.001,
         "latent_dim": 16,
         "random_seed": 42,
+        "train_subset_size": None,
+        "test_subset_size": None,
     }
     values[field] = value
 
     with pytest.raises(ValueError):
         config_from_dict(values)
+
+
+def test_subset_sizes_are_optional() -> None:
+    config = config_from_dict(
+        {
+            "model_type": "vae",
+            "architecture_preset": "deep",
+            "epochs": 1,
+            "batch_size": 16,
+            "learning_rate": 0.001,
+            "latent_dim": 8,
+            "random_seed": 99,
+        }
+    )
+
+    assert config.train_subset_size is None
+    assert config.test_subset_size is None
 
 
 def test_load_config_requires_json_object(tmp_path) -> None:

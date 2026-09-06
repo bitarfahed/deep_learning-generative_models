@@ -146,3 +146,67 @@ You may commit the completed work with an appropriate commit message.
 
 Stop after the core infrastructure is working. Do not begin the Fashion-MNIST data pipeline.
 ```
+
+## Prompt 4 - Fashion-MNIST Data Pipeline
+
+```text
+PROMPT 4 — Fashion-MNIST Data Pipeline
+
+Inspect the current repository before making any changes.
+
+This task is ONLY to implement the Fashion-MNIST data pipeline.
+
+Do NOT implement:
+- Autoencoder or VAE models
+- training loops
+- evaluation logic
+- generation
+- GUI
+- experiment comparison
+
+Follow the existing project design and infrastructure in README.md, docs/PLAN.md, docs/ARCHITECTURE.md, configs/default.json, and existing core utilities under src/deep_learning_generative_models/.
+
+Goal:
+Implement a small, reliable, reusable Fashion-MNIST data layer that future Autoencoder and VAE prompts can use without duplication.
+
+The dataset must download automatically when needed, cache locally, remain ignored by Git, work with the existing project paths/config structure, expose clean PyTorch DataLoaders, and remain fast enough for local development.
+
+Inspect existing data/path infrastructure before implementing. Reuse existing path and config conventions. Do not create duplicate path/config systems.
+
+Fashion-MNIST dataset module:
+Create a focused data module using torchvision.datasets.FashionMNIST. It should build the training dataset, test dataset, training DataLoader, and test DataLoader. Dataset root must come from centralized project path utilities. Automatic download should occur when files are missing, and cached local files should be reused on subsequent runs. Do not hard-code machine-specific paths.
+
+Transforms:
+Use only transforms justified for Autoencoder/VAE image reconstruction. At minimum, convert images to PyTorch tensors. Do not add aggressive augmentation. Do not add normalization unless there is a clear reason compatible with later reconstruction/generation outputs and visualization can reverse it cleanly. Prefer the simplest valid approach.
+
+DataLoader configuration:
+Use the existing project configuration where appropriate. Batch size should come from config. Training loader should shuffle, test loader should not shuffle. Use conservative DataLoader settings that work reliably on Windows/PyCharm. Avoid multiprocessing complexity and premature optimization.
+
+Data shapes and contracts:
+Document and enforce the Fashion-MNIST tensor contract. Expected image shape is equivalent to [batch, 1, 28, 28]. Do not flatten images in the data pipeline; future convolutional models should receive image tensors with spatial dimensions preserved.
+
+Optional small development subset:
+Add a simple optional mechanism for limiting train/test samples during smoke/development runs. Full dataset remains the default. Subset behavior must be explicit and must not silently reduce the dataset. Avoid a second data pipeline. Minimal config keys such as train_subset_size and test_subset_size are acceptable, with null meaning full dataset.
+
+Smoke / inspection command:
+Add a minimal terminal command that loads configuration, initializes Fashion-MNIST loaders, retrieves one batch, and prints train dataset size, test dataset size, batch image shape, label shape, and value range or another useful sanity check. Do not start training. Reuse package/module execution style or create a small dedicated data inspection command if clearer.
+
+Tests:
+Add focused pytest coverage for expected tensor/image shape, channel count, batch size behavior, train/test shuffle intent where cleanly testable, subset configuration behavior, invalid subset sizes, and compatibility with project paths. Avoid tests that repeatedly download the real Fashion-MNIST dataset. Prefer mocking, temporary directories, or lightweight construction. A single integration/smoke verification against the real dataset is acceptable outside the unit-test suite. Keep tests fast.
+
+Dependency discipline:
+Use existing dependencies where possible. Do not add unnecessary libraries. torchvision is already part of the agreed stack.
+
+Documentation:
+Update documentation only where the data implementation now makes planned behavior concrete. At minimum, update docs/ARCHITECTURE.md with the actual data-layer boundary and tensor contract, docs/PLAN.md milestone status if appropriate, and README.md with only a short dataset/download note or data smoke command if useful.
+
+Prompt Book:
+Append this exact development prompt, or a faithful preserved copy, to docs/PROMPTS_BOOK.md. Append only, preserve all previous prompt entries, maintain chronological order, and identify this entry as Prompt 4 — Fashion-MNIST Data Pipeline. Do not rewrite earlier prompts.
+
+Verification:
+Before finishing, run the relevant pytest suite, run the data smoke/inspection command, verify Fashion-MNIST downloads automatically if not already cached, verify subsequent access uses the local cache, inspect one real batch, verify image tensor shape is [batch, 1, 28, 28], verify dataset files remain ignored by Git, verify no model/training/evaluation/generation/GUI code was added, and inspect Git status.
+
+You may commit the completed work with an appropriate commit message.
+
+Stop after the Fashion-MNIST data pipeline is working. Do not begin the Autoencoder implementation.
+```

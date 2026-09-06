@@ -27,6 +27,8 @@ class ExperimentConfig:
     learning_rate: float
     latent_dim: int
     random_seed: int
+    train_subset_size: int | None = None
+    test_subset_size: int | None = None
 
     def validate(self) -> None:
         if self.model_type not in VALID_MODEL_TYPES:
@@ -43,6 +45,10 @@ class ExperimentConfig:
             raise ValueError("learning_rate must be positive")
         if self.latent_dim <= 0:
             raise ValueError("latent_dim must be positive")
+        if self.train_subset_size is not None and self.train_subset_size <= 0:
+            raise ValueError("train_subset_size must be positive or null")
+        if self.test_subset_size is not None and self.test_subset_size <= 0:
+            raise ValueError("test_subset_size must be positive or null")
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -70,9 +76,17 @@ def config_from_dict(values: dict[str, Any]) -> ExperimentConfig:
         learning_rate=float(values["learning_rate"]),
         latent_dim=int(values["latent_dim"]),
         random_seed=int(values["random_seed"]),
+        train_subset_size=_optional_positive_int(values.get("train_subset_size")),
+        test_subset_size=_optional_positive_int(values.get("test_subset_size")),
     )
     config.validate()
     return config
+
+
+def _optional_positive_int(value: Any) -> int | None:
+    if value is None:
+        return None
+    return int(value)
 
 
 def load_config(path: Path | str) -> ExperimentConfig:

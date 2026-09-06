@@ -176,8 +176,8 @@ Unless a later prompt explicitly changes the scope, do not add:
 
 1. Repository bootstrap and Git cleanup - completed
 2. Project design documentation - completed
-3. Core project architecture - current task
-4. Fashion-MNIST data pipeline
+3. Core project architecture - completed
+4. Fashion-MNIST data pipeline - current task
 5. Convolutional Autoencoder model
 6. Autoencoder training
 7. Autoencoder evaluation/reconstruction
@@ -198,4 +198,4 @@ This project is being developed with significant assistance from ChatGPT and Cod
 
 ## Next Step
 
-The next milestone is Fashion-MNIST data pipeline. It should add dataset download/loading behavior without implementing models, training loops, evaluation, generation, or GUI behavior prematurely.
+The next milestone is Convolutional Autoencoder model. It should add the baseline model definition without implementing training loops, evaluation, generation, or GUI behavior prematurely.

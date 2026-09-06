@@ -5,5 +5,7 @@
   "batch_size": 64,
   "learning_rate": 0.001,
   "latent_dim": 16,
-  "random_seed": 42
+  "random_seed": 42,
+  "train_subset_size": null,
+  "test_subset_size": null
 }

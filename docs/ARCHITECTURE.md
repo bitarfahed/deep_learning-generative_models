@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document records current core infrastructure and intended future component boundaries. It does not describe dataset loading, model, training, evaluation, generation, or GUI implementation.
+This document records current core infrastructure, the Fashion-MNIST data boundary, and intended future component boundaries. It does not describe model, training, evaluation, generation, or GUI implementation.
 
 ## Decisions Already Made
 
@@ -25,11 +25,34 @@ Current infrastructure modules:
 
 The default configuration is stored in `configs/default.json`.
 
+## Implemented Data Boundary
+
+Current data modules:
+
+- `data.py`: Fashion-MNIST dataset construction, optional explicit subsets, DataLoader creation, and tensor contract metadata.
+- `data_inspect.py`: smoke entry point for loading the real Fashion-MNIST DataLoaders and inspecting one batch without training.
+
+The data layer uses `torchvision.datasets.FashionMNIST` with `transforms.ToTensor()` only. It downloads the dataset automatically when needed and caches it under the centralized local data path.
+
+Tensor contract:
+
+- image batch shape: `[batch, 1, 28, 28]`
+- label batch shape: `[batch]`
+- image value range after `ToTensor()`: `[0.0, 1.0]`
+
+DataLoader policy:
+
+- batch size comes from configuration
+- training loader shuffles
+- test loader does not shuffle
+- `num_workers=0` for conservative Windows/PyCharm compatibility
+
+Optional development subsets are configured explicitly through `train_subset_size` and `test_subset_size`. `null` means the full split is used.
+
 ## Planned Component Boundaries
 
 Future implementation should separate these responsibilities:
 
-- data access and transforms
 - model definitions
 - training orchestration
 - evaluation and comparison
@@ -37,7 +60,7 @@ Future implementation should separate these responsibilities:
 - plotting and visualization helpers
 - later GUI exploration layer
 
-Only the core infrastructure modules exist now. Data, model, training, evaluation, generation, visualization, and GUI modules should be introduced when their milestone begins.
+Core infrastructure and Fashion-MNIST data modules exist now. Model, training, evaluation, generation, visualization, and GUI modules should be introduced when their milestone begins.
 
 ## Planned Data Flow
 
@@ -48,7 +71,8 @@ At a high level, future runs should follow this flow:
 3. Set reproducibility seeds.
 4. Create an experiment directory.
 5. Save resolved configuration and metadata.
-6. Later milestones will add Fashion-MNIST data access, model construction, training, checkpoints, metrics, plots, and GUI exploration.
+6. Load Fashion-MNIST DataLoaders when a future command needs data.
+7. Later milestones will add model construction, training, checkpoints, metrics, plots, and GUI exploration.
 
 ## Deferred Implementation Details
 
