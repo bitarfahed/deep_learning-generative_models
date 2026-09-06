@@ -855,3 +855,96 @@ Stop after the core QA/stabilization pass.
 
 Do not begin GUI implementation.
 ```
+
+## Prompt 13 - Interactive GUI Core
+
+```text
+PROMPT 13 — Interactive GUI Core
+
+Inspect the repository and reuse the existing stable core APIs.
+
+Goal:
+Add a simple single-window Tkinter GUI for exploring already-trained AE/VAE models.
+
+The GUI is an educational visualization layer, not the main project.
+
+Requirements:
+
+1. Use Tkinter.
+   Keep the interface simple and functional.
+   Do not introduce another GUI framework.
+
+2. Allow the user to:
+
+- choose model type: AE or VAE
+- choose Small / Medium / Deep preset
+- see a short description of the selected architecture
+- select/load a compatible existing checkpoint
+- browse a small set of Fashion-MNIST test images
+- select an image
+- run reconstruction
+- view Original vs Reconstruction
+
+3. For VAE checkpoints, also provide:
+
+- Generate Random
+- display the generated image(s)
+
+Reuse existing checkpoint, reconstruction, generation, device, and data APIs.
+Do not duplicate ML logic inside GUI code.
+
+4. The GUI must never train automatically.
+
+Do not add training controls in this prompt.
+
+5. Handle basic errors clearly:
+
+- missing checkpoint
+- incompatible checkpoint/model/preset
+- missing dataset
+- invalid selection
+
+The GUI should remain usable after recoverable errors.
+
+6. Keep ML work outside the Tkinter UI layer where possible.
+   The GUI should orchestrate existing services/functions rather than reimplement model behavior.
+
+7. Add focused tests for non-visual GUI/controller logic where practical.
+   Do not create fragile pixel/layout tests.
+
+8. Perform a manual smoke verification:
+
+- launch GUI
+- load an existing checkpoint
+- select a Fashion-MNIST image
+- reconstruct it
+- verify Original/Reconstruction display
+- verify VAE random generation
+
+9. Update documentation only where necessary.
+
+10. Append this prompt to docs/PROMPTS_BOOK.md as:
+
+Prompt 13 — Interactive GUI Core
+
+Preserve all previous entries.
+
+Do NOT implement yet:
+
+- latent sliders
+- interpolation UI
+- training from GUI
+- complex navigation/tabs
+- visual polish beyond basic usability
+
+Run the full test suite and commit the completed work.
+
+Final report should contain only:
+
+- main changes
+- tests/results
+- GUI smoke-test result
+- any problem or decision requiring attention
+
+Stop after the basic GUI works.
+```

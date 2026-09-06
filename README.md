@@ -31,7 +31,7 @@ The project emphasizes educational value, clear architecture, reproducible exper
 
 ## Current status
 
-Repository bootstrap, project design documentation, core infrastructure, the Fashion-MNIST data pipeline, AE/VAE model layers, explicit AE/VAE training, AE reconstruction evaluation, VAE generation/interpolation core, and AE vs VAE comparison are complete. GUI code has not been implemented yet.
+Repository bootstrap, project design documentation, core infrastructure, the Fashion-MNIST data pipeline, AE/VAE model layers, explicit AE/VAE training, AE reconstruction evaluation, VAE generation/interpolation core, AE vs VAE comparison, and the basic Tkinter GUI are complete. Latent-slider GUI features have not been implemented yet.
 
 Run the infrastructure smoke check from the source tree:
 
@@ -83,7 +83,13 @@ uv run python -m deep_learning_generative_models.compare --ae-checkpoint experim
 
 Comparison loads existing checkpoints, evaluates reconstruction on the same Fashion-MNIST test policy, saves representative outputs, and summarizes the reconstruction-vs-generative tradeoff.
 
-The future GUI is intended as an educational exploration layer over working models, not as the main purpose of the project. Training must not run automatically just because the GUI/application is opened.
+Open the basic Tkinter model explorer:
+
+```bash
+uv run python -m deep_learning_generative_models.gui
+```
+
+The GUI is intended as an educational exploration layer over working models, not as the main purpose of the project. Training does not run automatically when the GUI is opened.
 
 Cloud deployment, authentication, databases, backend APIs, LLM integration, TensorFlow, GANs, diffusion models, transformers, unrelated AI features, and unnecessary infrastructure are outside the current scope unless later justified.
 
@@ -105,6 +111,9 @@ src/deep_learning_generative_models/
   models.py
   train.py
   evaluate.py
+  generate.py
+  compare.py
+  gui.py
 tests/
 configs/
   default.json

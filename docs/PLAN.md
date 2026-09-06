@@ -132,9 +132,9 @@ Training, evaluation, generation, and comparison remain explicit CLI actions.
 
 ## GUI Direction
 
-The GUI is the next milestone and must remain separate from the completed non-GUI core.
+The basic Tkinter GUI is implemented as an educational exploration layer over the completed non-GUI core.
 
-Its purpose is educational exploration of already working models. It should eventually allow users to:
+It allows users to:
 
 - choose between Small, Medium, and Deep fixed architecture presets
 - see a short description of the selected architecture
@@ -142,6 +142,9 @@ Its purpose is educational exploration of already working models. It should even
 - compare original images with reconstructions
 - load previously trained checkpoints
 - perform random generation with the VAE
+
+It should eventually allow users to:
+
 - manipulate latent dimensions through controlled sliders
 - interpolate between latent representations of two selected images
 
@@ -149,10 +152,9 @@ Starting a new training run from the GUI may later be supported as an explicit u
 
 Deferred:
 
-- GUI framework
-- GUI layout
-- GUI state management
-- Any GUI implementation
+- latent slider controls
+- interpolation controls
+- training controls, unless later explicitly justified
 
 ## Scope Boundaries
 
@@ -184,7 +186,7 @@ Unless a later prompt explicitly changes the scope, do not add:
 10. Generation and latent-space exploration core - completed
 11. AE vs VAE experiments/comparison - completed
 12. Engineering and QA - completed
-13. Interactive GUI core
+13. Interactive GUI core - completed
 14. Latent-space GUI features
 15. Final documentation and portfolio audit
 
@@ -196,4 +198,4 @@ This project is being developed with significant assistance from ChatGPT and Cod
 
 ## Next Step
 
-The next milestone is Interactive GUI core. It should build on the existing callable core without retraining automatically or introducing unrelated infrastructure.
+The next milestone is Latent-space GUI features. It should add latent controls without introducing unrelated infrastructure.
