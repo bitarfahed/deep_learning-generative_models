@@ -348,3 +348,56 @@ You may commit the completed work with an appropriate commit message.
 
 Stop after Autoencoder training works end-to-end. Do not begin Autoencoder evaluation/reconstruction output work.
 ```
+
+## Prompt 7 - Autoencoder Evaluation & Reconstruction Outputs
+
+```text
+PROMPT 7 — Autoencoder Evaluation & Reconstruction Outputs
+
+Inspect the current repository before making any changes.
+
+This task is ONLY to implement evaluation and reconstruction outputs for the already implemented and trainable Autoencoder.
+
+Do NOT implement:
+- VAE
+- random generation from latent space
+- latent interpolation
+- GUI
+- AE vs VAE comparison
+- new model architectures
+
+Reuse the existing configuration system, device utilities, reproducibility utilities, experiment management, Fashion-MNIST data pipeline, Autoencoder presets/factory, checkpoint format, and training history/output conventions.
+
+Goal:
+Implement a clean evaluation workflow for trained AE checkpoints.
+
+The system should load a trained AE checkpoint, reconstruct Fashion-MNIST images, compute reconstruction loss on evaluation/test data, save representative original-vs-reconstruction visual outputs, save a training-loss plot from persisted history, persist a concise evaluation summary, and avoid retraining the model.
+
+Evaluation summary:
+Persist a concise machine-readable evaluation summary using JSON or another existing simple project format. Include at minimum checkpoint identifier/path, model type, architecture preset, latent dimension, device used, number of evaluated samples, test reconstruction loss, and paths to generated evaluation artifacts where useful. Do not introduce a database or experiment-tracking framework.
+
+Evaluation entry point:
+Provide a package-style evaluation command conceptually similar to `uv run python -m deep_learning_generative_models.evaluate --checkpoint <path>`. The command should load the checkpoint, evaluate it, save outputs, and print a concise summary. Keep CLI arguments minimal. Do not add retraining behavior.
+
+Output organization:
+Reuse the existing experiment/artifact structure. Prefer storing evaluation outputs under the relevant experiment directory or a clearly associated subdirectory. Avoid scattering files across the repository. Representative local artifacts should remain ignored by Git unless intentionally copied later into portfolio documentation.
+
+Tests:
+Add focused pytest coverage for valid checkpoint loading, invalid/missing checkpoint handling, evaluation under torch.no_grad(), output reconstruction shape, finite evaluation loss, evaluation summary creation, reconstruction figure creation, training-loss plot creation, and CPU compatibility. Use synthetic/tiny data where practical. Do not require CUDA, perform long training, or repeatedly download Fashion-MNIST in unit tests.
+
+Real smoke evaluation:
+Use the lightweight AE checkpoint produced by the previous prompt if available. Run one real evaluation against Fashion-MNIST test data or a deliberate small evaluation subset. Report checkpoint used, selected device, number of evaluated samples, test reconstruction loss, reconstruction figure path, training-loss plot path, and evaluation summary path. Do not perform new training merely to improve the visual result. If the previous smoke checkpoint is weak, evaluate it honestly and note that a later full training run may improve reconstruction quality.
+
+Documentation:
+Update docs/ARCHITECTURE.md with evaluation/checkpoint-loading flow, docs/PLAN.md to mark AE evaluation/reconstruction complete, and README.md with a concise evaluation command and expected outputs if useful. Do not claim the AE is high quality merely because the pipeline works.
+
+Prompt Book:
+Append this exact development prompt, or a faithful preserved copy, to docs/PROMPTS_BOOK.md. Append only, preserve all previous entries, maintain chronological order, and identify this entry as Prompt 7 — Autoencoder Evaluation & Reconstruction Outputs. Do not rewrite earlier prompts.
+
+Verification:
+Before finishing, run the relevant/full pytest suite, run the real AE smoke evaluation, verify checkpoint loads without retraining, verify test reconstruction loss is finite, inspect the saved reconstruction figure, inspect the saved training-loss plot, inspect the evaluation summary, verify outputs are organized consistently, verify no VAE/generation/interpolation/GUI implementation was added, and inspect Git status.
+
+You may commit the completed work with an appropriate commit message.
+
+Stop after the Autoencoder baseline is fully evaluable and produces reconstruction outputs. Do not begin VAE implementation.
+```

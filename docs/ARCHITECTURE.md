@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document records current core infrastructure, the Fashion-MNIST data boundary, the Convolutional Autoencoder model layer, Autoencoder training, and intended future component boundaries. It does not describe evaluation, VAE, generation, or GUI implementation.
+This document records current core infrastructure, the Fashion-MNIST data boundary, the Convolutional Autoencoder model layer, Autoencoder training, AE reconstruction evaluation, and intended future component boundaries. It does not describe VAE, generation, or GUI implementation.
 
 ## Decisions Already Made
 
@@ -120,16 +120,46 @@ History contract:
 
 Training artifacts are stored in the experiment directory and remain ignored by Git under `experiments/`.
 
+## Implemented AE Evaluation Boundary
+
+Current evaluation module:
+
+- `evaluate.py`: explicit package-style Autoencoder checkpoint evaluation, test reconstruction loss calculation, reconstruction figure creation, training-loss plot creation, and JSON summary persistence.
+
+Evaluation command:
+
+```bash
+uv run python -m deep_learning_generative_models.evaluate --checkpoint experiments/<experiment-name>/checkpoint.pt
+```
+
+Evaluation loads an existing checkpoint and does not retrain the model.
+
+Evaluation policy:
+
+- checkpoint must be an AE checkpoint
+- model weights are loaded from `model_state_dict`
+- evaluation runs under `torch.no_grad()`
+- reconstruction loss is mean squared error, matching AE training
+- optional `--max-samples` explicitly limits test samples for smoke runs
+
+Evaluation outputs are stored under the checkpoint experiment directory:
+
+- `evaluation/reconstructions.png`
+- `evaluation/training_loss.png`
+- `evaluation/evaluation_summary.json`
+
+The evaluation summary includes checkpoint path, model type, architecture preset, latent dimension, device, evaluated sample count, test reconstruction loss, and generated artifact paths.
+
 ## Planned Component Boundaries
 
 Future implementation should separate these responsibilities:
 
-- evaluation and comparison
+- AE vs VAE comparison
 - generation and latent-space utilities
 - plotting and visualization helpers
 - later GUI exploration layer
 
-Core infrastructure, Fashion-MNIST data modules, the AE model layer, and AE training exist now. Evaluation, VAE, generation, visualization, and GUI modules should be introduced when their milestone begins.
+Core infrastructure, Fashion-MNIST data modules, the AE model layer, AE training, and AE reconstruction evaluation exist now. VAE, generation, visualization, GUI, and comparison modules should be introduced when their milestone begins.
 
 ## Planned Data Flow
 
@@ -143,7 +173,8 @@ At a high level, future runs should follow this flow:
 6. Load Fashion-MNIST DataLoaders when a future command needs data.
 7. Build a Convolutional Autoencoder from the selected architecture preset when a future command needs the AE.
 8. Train the AE only through an explicit training command and save checkpoint/history artifacts.
-9. Later milestones will add evaluation outputs, metrics, plots, VAE behavior, generation, and GUI exploration.
+9. Evaluate trained AE checkpoints without retraining and save reconstruction artifacts.
+10. Later milestones will add VAE behavior, generation, AE vs VAE comparison, and GUI exploration.
 
 ## Deferred Implementation Details
 

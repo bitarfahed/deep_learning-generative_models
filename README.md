@@ -30,7 +30,7 @@ The project emphasizes educational value, clear architecture, reproducible exper
 
 ## Current status
 
-Repository bootstrap, project design documentation, core infrastructure, the Fashion-MNIST data pipeline, the Convolutional Autoencoder model layer, and explicit Autoencoder training are complete. Evaluation logic, VAE logic, generation utilities, and GUI code have not been implemented yet.
+Repository bootstrap, project design documentation, core infrastructure, the Fashion-MNIST data pipeline, the Convolutional Autoencoder model layer, explicit Autoencoder training, and AE reconstruction evaluation are complete. VAE logic, generation utilities, and GUI code have not been implemented yet.
 
 Run the infrastructure smoke check from the source tree:
 
@@ -51,6 +51,14 @@ uv run python -m deep_learning_generative_models.train --model ae --preset small
 ```
 
 Training only runs when the training command is executed.
+
+Evaluate a trained Autoencoder checkpoint:
+
+```bash
+uv run python -m deep_learning_generative_models.evaluate --checkpoint experiments/<experiment-name>/checkpoint.pt --max-samples 128
+```
+
+Evaluation loads an existing checkpoint and writes reconstruction figures, a training-loss plot, and a JSON summary under the same experiment directory.
 
 The future GUI is intended as an educational exploration layer over working models, not as the main purpose of the project. Training must not run automatically just because the GUI/application is opened.
 
@@ -73,6 +81,7 @@ src/deep_learning_generative_models/
   data_inspect.py
   models.py
   train.py
+  evaluate.py
 tests/
 configs/
   default.json
