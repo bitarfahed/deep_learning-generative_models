@@ -22,7 +22,12 @@ from deep_learning_generative_models.config import (
 )
 from deep_learning_generative_models.data import build_fashion_mnist_loaders
 from deep_learning_generative_models.device import DeviceInfo, get_device
-from deep_learning_generative_models.experiments import ExperimentRecord, create_experiment
+from deep_learning_generative_models.experiments import (
+    ExperimentRecord,
+    checkpoint_filename,
+    create_experiment,
+    training_history_filename,
+)
 from deep_learning_generative_models.models import (
     ConvolutionalAutoencoder,
     VAEForwardOutput,
@@ -31,8 +36,10 @@ from deep_learning_generative_models.models import (
 )
 from deep_learning_generative_models.reproducibility import seed_everything
 
-HISTORY_FILENAME = "training_history.csv"
-CHECKPOINT_FILENAME = "checkpoint.pt"
+LEGACY_HISTORY_FILENAME = "training_history.csv"
+LEGACY_CHECKPOINT_FILENAME = "checkpoint.pt"
+HISTORY_FILENAME = "<model>-<preset>-training-history.csv"
+CHECKPOINT_FILENAME = "<model>-<preset>-checkpoint.pt"
 
 
 @dataclass(frozen=True)
@@ -209,8 +216,8 @@ def train_model(
         print(progress)
 
     duration_seconds = time.perf_counter() - started_at
-    history_path = experiment.path / HISTORY_FILENAME
-    checkpoint_path = experiment.path / CHECKPOINT_FILENAME
+    history_path = experiment.path / training_history_filename(config)
+    checkpoint_path = experiment.path / checkpoint_filename(config)
     save_training_history(history, history_path)
     save_model_checkpoint(
         model=model,
@@ -361,6 +368,16 @@ def load_model_checkpoint(
     model.load_state_dict(checkpoint["model_state_dict"])
     model.eval()
     return model, checkpoint
+
+
+def compatible_training_history_paths(
+    experiment_dir: Path,
+    config: ExperimentConfig,
+) -> list[Path]:
+    return [
+        experiment_dir / training_history_filename(config),
+        experiment_dir / LEGACY_HISTORY_FILENAME,
+    ]
 
 
 def _validate_checkpoint_metadata(

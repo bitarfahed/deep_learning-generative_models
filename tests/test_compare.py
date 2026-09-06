@@ -199,4 +199,6 @@ def test_default_comparison_directory_uses_experiments(monkeypatch, tmp_path) ->
     )
 
     assert result.output_dir.parent == tmp_path / "experiments"
-    assert COMPARISON_DIR_PREFIX in result.output_dir.name
+    assert result.output_dir.name.startswith(
+        f"{COMPARISON_DIR_PREFIX}-ae-small-vs-vae-small-fashion-mnist-"
+    )

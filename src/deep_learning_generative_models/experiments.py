@@ -12,6 +12,8 @@ from deep_learning_generative_models.config import ExperimentConfig, save_config
 from deep_learning_generative_models.device import DeviceInfo
 from deep_learning_generative_models.paths import ProjectPaths, get_project_paths
 
+DATASET_SLUG = "fashion-mnist"
+
 
 @dataclass(frozen=True)
 class ExperimentMetadata:
@@ -36,6 +38,37 @@ class ExperimentRecord:
     metadata: ExperimentMetadata
 
 
+def artifact_prefix(config: ExperimentConfig) -> str:
+    return f"{config.model_type}-{config.architecture_preset}"
+
+
+def checkpoint_filename(config: ExperimentConfig) -> str:
+    return f"{artifact_prefix(config)}-checkpoint.pt"
+
+
+def training_history_filename(config: ExperimentConfig) -> str:
+    return f"{artifact_prefix(config)}-training-history.csv"
+
+
+def config_filename(config: ExperimentConfig) -> str:
+    return f"{artifact_prefix(config)}-config.json"
+
+
+def metadata_filename(config: ExperimentConfig) -> str:
+    return f"{artifact_prefix(config)}-metadata.json"
+
+
+def experiment_directory_name(
+    config: ExperimentConfig,
+    created_at: datetime,
+    experiment_id: str,
+) -> str:
+    return (
+        f"{config.model_type}-{config.architecture_preset}-{DATASET_SLUG}-"
+        f"{config.epochs}ep-{created_at:%Y%m%d-%H%M%S}-{experiment_id}"
+    )
+
+
 def create_experiment(
     config: ExperimentConfig,
     device_info: DeviceInfo,
@@ -44,15 +77,12 @@ def create_experiment(
     project_paths = paths or get_project_paths()
     created_at = datetime.now(UTC)
     experiment_id = uuid4().hex[:8]
-    experiment_name = (
-        f"{created_at:%Y%m%d-%H%M%S}-{config.model_type}-"
-        f"{config.architecture_preset}-{experiment_id}"
-    )
+    experiment_name = experiment_directory_name(config, created_at, experiment_id)
     experiment_path = project_paths.experiments_dir / experiment_name
     experiment_path.mkdir(parents=True, exist_ok=False)
 
-    config_path = experiment_path / "config.json"
-    metadata_path = experiment_path / "metadata.json"
+    config_path = experiment_path / config_filename(config)
+    metadata_path = experiment_path / metadata_filename(config)
     save_config(config, config_path)
 
     metadata = ExperimentMetadata(

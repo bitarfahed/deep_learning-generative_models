@@ -30,6 +30,7 @@ from deep_learning_generative_models.models import (
     VAEForwardOutput,
     VariationalAutoencoder,
 )
+from deep_learning_generative_models.experiments import DATASET_SLUG
 from deep_learning_generative_models.paths import get_project_paths
 from deep_learning_generative_models.reproducibility import seed_everything
 from deep_learning_generative_models.train import (
@@ -352,9 +353,9 @@ def _default_comparison_dir(
     created_at = datetime.now(UTC)
     comparison_id = uuid4().hex[:8]
     directory_name = (
-        f"{created_at:%Y%m%d-%H%M%S}-{COMPARISON_DIR_PREFIX}-"
-        f"ae-{ae_config.architecture_preset}-vs-vae-"
-        f"{vae_config.architecture_preset}-{comparison_id}"
+        f"{COMPARISON_DIR_PREFIX}-ae-{ae_config.architecture_preset}-"
+        f"vs-vae-{vae_config.architecture_preset}-{DATASET_SLUG}-"
+        f"{created_at:%Y%m%d-%H%M%S}-{comparison_id}"
     )
     return paths.experiments_dir / directory_name
 

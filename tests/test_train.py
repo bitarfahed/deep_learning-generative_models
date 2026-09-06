@@ -14,6 +14,8 @@ from deep_learning_generative_models.models import build_model
 from deep_learning_generative_models.paths import ProjectPaths
 from deep_learning_generative_models.train import (
     EpochHistory,
+    LEGACY_HISTORY_FILENAME,
+    compatible_training_history_paths,
     compute_loss,
     load_autoencoder_checkpoint,
     load_model_checkpoint,
@@ -107,6 +109,8 @@ def test_train_autoencoder_saves_history_and_checkpoint(config, paths) -> None:
 
     assert result.checkpoint_path.is_file()
     assert result.history_path.is_file()
+    assert result.checkpoint_path.name == "ae-small-checkpoint.pt"
+    assert result.history_path.name == "ae-small-training-history.csv"
     assert result.final_loss == result.history[-1].train_reconstruction_loss
 
     with result.history_path.open("r", encoding="utf-8", newline="") as file:
@@ -189,6 +193,8 @@ def test_train_vae_saves_history_and_checkpoint(paths) -> None:
 
     assert result.checkpoint_path.is_file()
     assert result.history_path.is_file()
+    assert result.checkpoint_path.name == "vae-small-checkpoint.pt"
+    assert result.history_path.name == "vae-small-training-history.csv"
     assert result.final_kl_loss is not None
     assert result.final_loss == result.history[-1].train_loss
     assert result.final_reconstruction_loss == result.history[-1].train_reconstruction_loss
@@ -231,6 +237,18 @@ def test_save_training_history_preserves_ae_columns(tmp_path) -> None:
         rows = list(csv.DictReader(file))
 
     assert rows == [{"epoch": "1", "train_reconstruction_loss": "0.25"}]
+
+
+def test_compatible_training_history_paths_include_named_then_legacy(
+    config,
+    tmp_path,
+) -> None:
+    paths = compatible_training_history_paths(tmp_path, config)
+
+    assert [path.name for path in paths] == [
+        "ae-small-training-history.csv",
+        LEGACY_HISTORY_FILENAME,
+    ]
 
 
 def test_saved_autoencoder_checkpoint_can_be_loaded(config, paths) -> None:

@@ -155,7 +155,7 @@ MSE is used because Fashion-MNIST inputs are grayscale tensors in `[0.0, 1.0]`, 
 
 Checkpoint contract:
 
-- checkpoint file: `checkpoint.pt`
+- checkpoint file: `<model>-<preset>-checkpoint.pt`, for example `ae-small-checkpoint.pt`
 - format: `torch.save` dictionary with `state_dict`, not a serialized model object
 - includes model type, architecture preset, latent dimension, epoch count, resolved config, training history, and model weights
 - checkpoint loading validates top-level model metadata against the saved resolved configuration
@@ -163,7 +163,7 @@ Checkpoint contract:
 
 History contract:
 
-- history file: `training_history.csv`
+- history file: `<model>-<preset>-training-history.csv`, for example `ae-small-training-history.csv`
 - AE columns: `epoch`, `train_reconstruction_loss`
 - VAE columns: `epoch`, `train_loss`, `train_reconstruction_loss`, `train_kl_loss`
 
@@ -178,7 +178,7 @@ Current evaluation module:
 Evaluation command:
 
 ```bash
-uv run python -m deep_learning_generative_models.evaluate --checkpoint experiments/<experiment-name>/checkpoint.pt
+uv run python -m deep_learning_generative_models.evaluate --checkpoint experiments/<experiment-name>/ae-small-checkpoint.pt
 ```
 
 Evaluation loads an existing checkpoint and does not retrain the model.
@@ -208,7 +208,7 @@ Current generation module:
 Generation command:
 
 ```bash
-uv run python -m deep_learning_generative_models.generate --checkpoint experiments/<experiment-name>/checkpoint.pt --mode both
+uv run python -m deep_learning_generative_models.generate --checkpoint experiments/<experiment-name>/vae-small-checkpoint.pt --mode both
 ```
 
 Generation occurs only when this command is run. Importing the package or opening the project does not generate images, load data, or retrain models.
@@ -242,14 +242,14 @@ Current comparison module:
 Comparison command:
 
 ```bash
-uv run python -m deep_learning_generative_models.compare --ae-checkpoint experiments/<ae-experiment>/checkpoint.pt --vae-checkpoint experiments/<vae-experiment>/checkpoint.pt
+uv run python -m deep_learning_generative_models.compare --ae-checkpoint experiments/<ae-experiment>/ae-small-checkpoint.pt --vae-checkpoint experiments/<vae-experiment>/vae-small-checkpoint.pt
 ```
 
 Comparison occurs only when this command is run. It does not retrain either model.
 
 Comparison policy:
 
-- AE and VAE checkpoints are loaded from existing `checkpoint.pt` files.
+- AE and VAE checkpoints are loaded from explicit checkpoint paths. New experiments use readable checkpoint filenames, and older `checkpoint.pt` files remain loadable when provided directly.
 - Both models are evaluated on the same Fashion-MNIST test loader policy.
 - Optional `--max-samples` keeps smoke comparisons short and explicit.
 - The comparison records test reconstruction loss for each model.

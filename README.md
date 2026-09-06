@@ -64,19 +64,19 @@ Training runs only when the training command is executed. Importing the package 
 Evaluate an existing AE checkpoint:
 
 ```bash
-uv run python -m deep_learning_generative_models.evaluate --checkpoint experiments/<ae-experiment>/checkpoint.pt --max-samples 128
+uv run python -m deep_learning_generative_models.evaluate --checkpoint experiments/<ae-experiment>/ae-small-checkpoint.pt --max-samples 128
 ```
 
 Generate VAE samples and latent interpolations from an existing VAE checkpoint:
 
 ```bash
-uv run python -m deep_learning_generative_models.generate --checkpoint experiments/<vae-experiment>/checkpoint.pt --mode both --count 16 --steps 8 --seed 42
+uv run python -m deep_learning_generative_models.generate --checkpoint experiments/<vae-experiment>/vae-small-checkpoint.pt --mode both --count 16 --steps 8 --seed 42
 ```
 
 Compare existing AE and VAE checkpoints:
 
 ```bash
-uv run python -m deep_learning_generative_models.compare --ae-checkpoint experiments/<ae-experiment>/checkpoint.pt --vae-checkpoint experiments/<vae-experiment>/checkpoint.pt --max-samples 128 --generated-count 16 --seed 42
+uv run python -m deep_learning_generative_models.compare --ae-checkpoint experiments/<ae-experiment>/ae-small-checkpoint.pt --vae-checkpoint experiments/<vae-experiment>/vae-small-checkpoint.pt --max-samples 128 --generated-count 16 --seed 42
 ```
 
 Open the Tkinter model explorer:
@@ -136,6 +136,8 @@ tests/
 ```
 
 Local datasets, checkpoints, experiment directories, caches, IDE files, and virtual environments are ignored by Git.
+
+New experiment directories use readable names such as `ae-small-fashion-mnist-1ep-20260906-181819-9a1b0070`. New training artifacts use names such as `ae-small-checkpoint.pt`, `ae-small-training-history.csv`, `ae-small-config.json`, and `ae-small-metadata.json`. Existing older checkpoints can still be loaded when their explicit path is provided.
 
 ## Limitations
 

@@ -17,6 +17,7 @@ from deep_learning_generative_models.evaluate import (
 from deep_learning_generative_models.models import build_model
 from deep_learning_generative_models.train import (
     EpochHistory,
+    LEGACY_HISTORY_FILENAME,
     save_autoencoder_checkpoint,
 )
 
@@ -139,6 +140,31 @@ def test_evaluate_checkpoint_creates_summary_and_outputs(monkeypatch, tmp_path) 
     assert summary["reconstruction_figure_path"] == str(
         result.reconstruction_figure_path
     )
+
+
+def test_evaluate_checkpoint_loads_legacy_history_file(monkeypatch, tmp_path) -> None:
+    _config, _model, checkpoint_path = _checkpoint_path(tmp_path)
+    checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
+    checkpoint["history"] = []
+    torch.save(checkpoint, checkpoint_path)
+    (tmp_path / LEGACY_HISTORY_FILENAME).write_text(
+        "epoch,train_reconstruction_loss\n1,0.2\n",
+        encoding="utf-8",
+    )
+
+    class FakeLoaders:
+        train = _loader()
+        test = _loader()
+
+    monkeypatch.setattr(
+        "deep_learning_generative_models.evaluate.build_fashion_mnist_loaders",
+        lambda _config: FakeLoaders,
+    )
+
+    result = evaluate_checkpoint(checkpoint_path, max_samples=3, max_images=2)
+
+    assert result.training_loss_plot_path is not None
+    assert result.training_loss_plot_path.is_file()
 
 
 def test_evaluate_checkpoint_rejects_missing_checkpoint(tmp_path) -> None:

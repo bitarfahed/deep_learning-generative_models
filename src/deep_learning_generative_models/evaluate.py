@@ -22,7 +22,7 @@ from deep_learning_generative_models.data import build_fashion_mnist_loaders
 from deep_learning_generative_models.device import DeviceInfo, get_device
 from deep_learning_generative_models.train import (
     CHECKPOINT_FILENAME,
-    HISTORY_FILENAME,
+    compatible_training_history_paths,
     load_autoencoder_checkpoint,
 )
 
@@ -226,9 +226,13 @@ def evaluate_checkpoint(
 
     history = load_training_history_from_checkpoint(checkpoint)
     if not history:
-        history = load_training_history_from_csv(
-            resolved_checkpoint_path.parent / HISTORY_FILENAME
-        )
+        for history_path in compatible_training_history_paths(
+            resolved_checkpoint_path.parent,
+            config,
+        ):
+            history = load_training_history_from_csv(history_path)
+            if history:
+                break
     saved_training_loss_plot_path = save_training_loss_plot(
         history=history,
         path=training_loss_plot_path,

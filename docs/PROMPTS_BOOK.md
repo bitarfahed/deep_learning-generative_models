@@ -1202,3 +1202,91 @@ If there are no blocking issues, explicitly state that feature development shoul
 
 Do not propose additional features after declaring the project complete.
 ```
+
+## Prompt 16 - Human-Readable Experiment Artifact Names
+
+```text
+PROMPT 16 - Human-Readable Experiment Artifact Names
+
+Inspect the existing experiment/output naming implementation before making changes.
+
+Goal:
+Make experiment directories and saved training artifacts easier for a human to identify.
+
+This is a small naming/usability change only.
+
+Requirements:
+
+1. Replace experiment directory names such as:
+
+20260906-181819-ae-small-9a1b0070
+
+with a readable convention similar to:
+
+ae-small-fashion-mnist-8ep-20260906-181819
+
+and:
+
+vae-small-fashion-mnist-12ep-20260906-193000
+
+Keep enough timestamp/uniqueness information to avoid collisions.
+
+2. Give important saved files meaningful names, for example:
+
+ae-small-checkpoint.pt
+ae-small-training-history.csv
+ae-small-config.json
+ae-small-metadata.json
+
+and corresponding VAE names.
+
+The exact implementation may use one centralized naming helper.
+
+3. Update all existing code that reads these artifacts:
+
+- checkpoint loading
+- evaluation
+- generation
+- comparison
+- GUI
+- tests
+
+Do not break compatibility unnecessarily.
+
+If practical, existing older experiment directories/checkpoints using the previous generic filenames should remain loadable.
+
+4. Do not rename or migrate existing local experiment directories automatically.
+
+The new naming convention should apply to newly created experiments.
+
+5. Add/update focused tests for the naming behavior and artifact loading.
+
+Run the full test suite.
+
+6. Update documentation only where the documented filenames/conventions require correction.
+
+7. Append this prompt to docs/PROMPTS_BOOK.md as:
+
+Prompt 16 - Human-Readable Experiment Artifact Names
+
+Preserve all previous entries.
+
+Do NOT:
+
+- change model architecture
+- change training behavior
+- change hyperparameters
+- add GUI features
+- perform full training
+
+Commit the completed change.
+
+Final report should contain only:
+
+- naming convention implemented
+- backward-compatibility behavior
+- test result
+- any problem requiring attention
+
+Stop after the naming change.
+```
