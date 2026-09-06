@@ -278,3 +278,73 @@ You may commit the completed work with an appropriate commit message.
 
 Stop after the Convolutional Autoencoder model layer is complete. Do not begin Autoencoder training.
 ```
+
+## Prompt 6 - Autoencoder Training Pipeline
+
+```text
+PROMPT 6 — Autoencoder Training Pipeline
+
+Inspect the current repository before making any changes.
+
+This task is ONLY to implement the training pipeline for the existing Convolutional Autoencoder.
+
+Do NOT implement:
+- VAE
+- random generation
+- latent interpolation
+- GUI
+- AE vs VAE comparison
+- unrelated evaluation features
+
+Reuse the existing configuration system, device utilities, reproducibility utilities, experiment management, Fashion-MNIST data pipeline, and Autoencoder presets/factory.
+
+Goal:
+Implement a reusable Autoencoder training pipeline that can load configuration, select device, set random seeds, load Fashion-MNIST, construct the selected AE preset, train for the configured number of epochs, track training loss, save the trained checkpoint, persist training history/results in the experiment directory, and allow future runs to load the saved model instead of retraining automatically.
+
+Keep the implementation simple and reusable for later VAE integration.
+
+Inspect existing architecture before implementing: config.py, experiments.py, device.py, reproducibility.py, data pipeline, AE model/factory, and docs/ARCHITECTURE.md. Do not duplicate existing infrastructure.
+
+Reconstruction loss:
+Use an appropriate reconstruction loss consistent with Fashion-MNIST preprocessing and AE output range. Choose one clear default such as Binary Cross Entropy if model outputs are in [0, 1], or Mean Squared Error if better justified. Document the decision. Do not add multiple loss choices unless clearly needed.
+
+Optimizer:
+Use a simple default optimizer suitable for this project. Prefer Adam unless the repository already contains a justified alternative. Use configured learning rate. Do not introduce optimizer complexity or schedulers.
+
+Training loop:
+For each epoch, iterate over the training DataLoader, move images to device, zero gradients, forward pass, compute reconstruction loss, backward pass, optimizer step, and accumulate epoch loss. Report concise progress and avoid excessive logging. Keep the loop reusable enough for later VAE training without implementing VAE-specific logic.
+
+Training entry point:
+Provide a clean package-style training command conceptually similar to `uv run python -m deep_learning_generative_models.train --model ae`. It should load default config, allow at least model/preset selection, initialize the experiment, train the model, save outputs, and print the experiment location. Keep CLI arguments minimal.
+
+Checkpoint saving:
+Save a checkpoint in the experiment directory. Include enough information to reconstruct and load the model safely: model state_dict, model type, architecture preset, latent dimension/config needed by the model, relevant training configuration, and epoch count. Do not save the entire Python model object. Checkpoint files remain ignored by Git under artifact/experiment policy.
+
+Training history:
+Persist training history in a simple machine-readable format such as CSV or JSON. At minimum save epoch and training reconstruction loss. Do not add TensorBoard or database logging.
+
+Runtime behavior:
+The project must not retrain automatically whenever opened or imported. Training occurs only when the explicit training command is run. Saved checkpoints should be usable later by evaluation/GUI prompts.
+
+Development-speed support:
+Respect the project's short-run policy. The existing subset mechanism should remain usable for quick development/smoke training. Do not silently reduce the full dataset. A small explicit development run may use small architecture, limited subset, and 1-2 epochs. Do not add hidden fast-mode behavior.
+
+Tests:
+Add focused pytest coverage using synthetic tensors, tiny mocked/fake datasets, and very short training runs where appropriate. Test that one training step updates model parameters, loss is finite, training history is recorded, checkpoint is created, checkpoint contains required metadata/state, CPU training path works, and invalid/non-AE training requests fail cleanly. Do not download Fashion-MNIST inside unit tests, require CUDA, or run expensive training.
+
+Smoke training verification:
+Perform one real lightweight AE training smoke run using Fashion-MNIST, for example Small preset, small explicit training subset, and 1 epoch. Report selected device, dataset/subset size, training duration if easy to measure, final training loss, and checkpoint path. Do not perform a long/full training run.
+
+Documentation:
+Update docs/ARCHITECTURE.md with training flow and checkpoint contract, docs/PLAN.md milestone status if appropriate, and README.md with a concise training command and note that training is explicit. Do not add claims about model quality.
+
+Prompt Book:
+Append this exact development prompt, or a faithful preserved copy, to docs/PROMPTS_BOOK.md. Append only, preserve all previous entries, maintain chronological order, and identify this entry as Prompt 6 — Autoencoder Training Pipeline. Do not rewrite earlier prompts.
+
+Verification:
+Before finishing, run the relevant/full pytest suite, run the lightweight real AE smoke training, verify checkpoint creation, verify training-history persistence, inspect checkpoint metadata, verify experiment artifacts remain ignored by Git, verify training occurs only through explicit execution, verify no VAE/generation/GUI implementation was added, and inspect Git status.
+
+You may commit the completed work with an appropriate commit message.
+
+Stop after Autoencoder training works end-to-end. Do not begin Autoencoder evaluation/reconstruction output work.
+```

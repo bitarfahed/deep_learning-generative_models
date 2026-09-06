@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document records current core infrastructure, the Fashion-MNIST data boundary, the Convolutional Autoencoder model layer, and intended future component boundaries. It does not describe training, evaluation, VAE, generation, or GUI implementation.
+This document records current core infrastructure, the Fashion-MNIST data boundary, the Convolutional Autoencoder model layer, Autoencoder training, and intended future component boundaries. It does not describe evaluation, VAE, generation, or GUI implementation.
 
 ## Decisions Already Made
 
@@ -83,17 +83,53 @@ AE presets:
 
 All presets encode to a `7x7` spatial feature map before the linear latent projection. Decoders use corresponding convolutional refinement followed by two transposed-convolution upsampling stages back to `28x28`.
 
+## Implemented AE Training Boundary
+
+Current training module:
+
+- `train.py`: explicit package-style Autoencoder training command, reusable one-epoch loop, full AE training orchestration, checkpoint saving/loading, and CSV history persistence.
+
+Training command:
+
+```bash
+uv run python -m deep_learning_generative_models.train --model ae
+```
+
+Training occurs only when this command is run. Importing the package or opening the project does not start training.
+
+Training policy:
+
+- model type must be `ae`
+- reconstruction loss is mean squared error
+- optimizer is Adam using the configured learning rate
+- images are moved to the selected device
+- training history records average per-example reconstruction loss by epoch
+
+MSE is used because Fashion-MNIST inputs are grayscale tensors in `[0.0, 1.0]`, not binary targets. The AE decoder uses `Sigmoid`, so outputs remain bounded for reconstruction.
+
+Checkpoint contract:
+
+- checkpoint file: `checkpoint.pt`
+- format: `torch.save` dictionary with `state_dict`, not a serialized model object
+- includes model type, architecture preset, latent dimension, epoch count, resolved config, training history, and model weights
+
+History contract:
+
+- history file: `training_history.csv`
+- columns: `epoch`, `train_reconstruction_loss`
+
+Training artifacts are stored in the experiment directory and remain ignored by Git under `experiments/`.
+
 ## Planned Component Boundaries
 
 Future implementation should separate these responsibilities:
 
-- training orchestration
 - evaluation and comparison
 - generation and latent-space utilities
 - plotting and visualization helpers
 - later GUI exploration layer
 
-Core infrastructure, Fashion-MNIST data modules, and the AE model layer exist now. Training, evaluation, VAE, generation, visualization, and GUI modules should be introduced when their milestone begins.
+Core infrastructure, Fashion-MNIST data modules, the AE model layer, and AE training exist now. Evaluation, VAE, generation, visualization, and GUI modules should be introduced when their milestone begins.
 
 ## Planned Data Flow
 
@@ -106,7 +142,8 @@ At a high level, future runs should follow this flow:
 5. Save resolved configuration and metadata.
 6. Load Fashion-MNIST DataLoaders when a future command needs data.
 7. Build a Convolutional Autoencoder from the selected architecture preset when a future command needs the AE.
-8. Later milestones will add training, checkpoints, metrics, plots, VAE behavior, generation, and GUI exploration.
+8. Train the AE only through an explicit training command and save checkpoint/history artifacts.
+9. Later milestones will add evaluation outputs, metrics, plots, VAE behavior, generation, and GUI exploration.
 
 ## Deferred Implementation Details
 
@@ -114,7 +151,7 @@ The following are intentionally not decided here:
 
 - VAE neural-network layers
 - VAE channel counts and latent policy
-- final hyperparameters
+- final production hyperparameters
 - complete experiment artifact schema
 - GUI framework
 - GUI layout and interactions

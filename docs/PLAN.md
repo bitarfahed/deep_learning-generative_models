@@ -179,7 +179,7 @@ Unless a later prompt explicitly changes the scope, do not add:
 3. Core project architecture - completed
 4. Fashion-MNIST data pipeline - completed
 5. Convolutional Autoencoder model - completed
-6. Autoencoder training
+6. Autoencoder training - completed
 7. Autoencoder evaluation/reconstruction
 8. Variational Autoencoder model
 9. VAE training integration
@@ -198,4 +198,4 @@ This project is being developed with significant assistance from ChatGPT and Cod
 
 ## Next Step
 
-The next milestone is Autoencoder training. It should add training behavior for the AE without implementing VAE logic, generation, experiment comparison, or GUI behavior prematurely.
+The next milestone is Autoencoder evaluation/reconstruction. It should add focused AE reconstruction inspection without implementing VAE logic, generation, experiment comparison, or GUI behavior prematurely.
