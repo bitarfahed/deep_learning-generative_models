@@ -26,6 +26,9 @@ from deep_learning_generative_models.train import CHECKPOINT_FILENAME, load_mode
 
 PREVIEW_IMAGE_COUNT = 24
 DISPLAY_SCALE = 6
+LATENT_SLIDER_LIMIT = 8
+LATENT_SLIDER_MIN = -3.0
+LATENT_SLIDER_MAX = 3.0
 
 
 @dataclass(frozen=True)
@@ -44,6 +47,7 @@ class ModelExplorerService:
         self.loaded: LoadedCheckpoint | None = None
         self.test_images: list[Tensor] = []
         self.test_labels: list[int] = []
+        self.encoded_latent: Tensor | None = None
 
     def architecture_description(
         self,
@@ -84,6 +88,7 @@ class ModelExplorerService:
             checkpoint=checkpoint,
             config=config,
         )
+        self.encoded_latent = None
         self._load_test_examples(config, preview_count)
         return self.loaded
 
@@ -105,6 +110,54 @@ class ModelExplorerService:
             device=self.device_info.device,
             seed=seed,
         )
+
+    def vae_features_available(self) -> bool:
+        return isinstance(self.loaded.model, VariationalAutoencoder) if self.loaded else False
+
+    def encode_selected_image(self, index: int) -> Tensor:
+        model = self._require_vae()
+        image = self._test_image(index)
+        with torch.no_grad():
+            batch = image.unsqueeze(0).to(self.device_info.device)
+            mu, _logvar = model.encode(batch)
+            self.encoded_latent = mu.squeeze(0).detach().cpu()
+        return self.encoded_latent.clone()
+
+    def decode_latent(self, latent: Tensor) -> Tensor:
+        model = self._require_vae()
+        if latent.shape != (model.latent_dim,):
+            raise ValueError(f"latent vector must have shape [{model.latent_dim}]")
+        with torch.no_grad():
+            batch = latent.unsqueeze(0).to(self.device_info.device)
+            return model.decode(batch).squeeze(0).detach().cpu()
+
+    def decode_modified_latent(self, base_latent: Tensor, values: dict[int, float]) -> Tensor:
+        latent = modify_latent_vector(base_latent, values)
+        return self.decode_latent(latent)
+
+    def interpolate_selected_images(
+        self,
+        index_a: int,
+        index_b: int,
+        alpha: float,
+    ) -> Tensor:
+        model = self._require_vae()
+        if alpha < 0.0 or alpha > 1.0:
+            raise ValueError("alpha must be between 0.0 and 1.0")
+        image_a = self._test_image(index_a)
+        image_b = self._test_image(index_b)
+
+        with torch.no_grad():
+            batch_a = image_a.unsqueeze(0).to(self.device_info.device)
+            batch_b = image_b.unsqueeze(0).to(self.device_info.device)
+            mu_a, _logvar_a = model.encode(batch_a)
+            mu_b, _logvar_b = model.encode(batch_b)
+            latent = interpolate_latent_vectors(
+                mu_a.squeeze(0),
+                mu_b.squeeze(0),
+                alpha,
+            )
+            return model.decode(latent.unsqueeze(0)).squeeze(0).detach().cpu()
 
     def _load_test_examples(self, config: ExperimentConfig, preview_count: int) -> None:
         if preview_count <= 0:
@@ -133,6 +186,12 @@ class ModelExplorerService:
             raise ValueError("Load a compatible checkpoint first")
         return self.loaded
 
+    def _require_vae(self) -> VariationalAutoencoder:
+        loaded = self._require_loaded()
+        if not isinstance(loaded.model, VariationalAutoencoder):
+            raise ValueError("Latent-space exploration requires a VAE checkpoint")
+        return loaded.model
+
 
 def model_reconstruction(model: nn.Module, images: Tensor) -> Tensor:
     output = model(images)
@@ -141,6 +200,26 @@ def model_reconstruction(model: nn.Module, images: Tensor) -> Tensor:
     if isinstance(output, Tensor):
         return output
     raise TypeError("Model output must be a reconstruction tensor or VAEForwardOutput")
+
+
+def interpolate_latent_vectors(start: Tensor, end: Tensor, alpha: float) -> Tensor:
+    if start.shape != end.shape:
+        raise ValueError("start and end latent tensors must have matching shapes")
+    if alpha < 0.0 or alpha > 1.0:
+        raise ValueError("alpha must be between 0.0 and 1.0")
+    return (1.0 - alpha) * start + alpha * end
+
+
+def modify_latent_vector(base_latent: Tensor, values: dict[int, float]) -> Tensor:
+    if base_latent.ndim != 1:
+        raise ValueError("base_latent must be one-dimensional")
+    modified = base_latent.detach().clone()
+    for index, value in values.items():
+        if index < 0 or index >= modified.shape[0]:
+            raise IndexError("latent dimension index is out of range")
+        bounded = max(LATENT_SLIDER_MIN, min(LATENT_SLIDER_MAX, float(value)))
+        modified[index] = bounded
+    return modified
 
 
 def tensor_to_tk_color_rows(image: Tensor, scale: int = DISPLAY_SCALE) -> list[str]:
@@ -187,12 +266,17 @@ class ModelExplorerApp:
         self.image_index_var = tk.IntVar(value=0)
         self.status_var = tk.StringVar(value=self.service.device_info.description)
         self.description_var = tk.StringVar(value="")
+        self.image_b_index_var = tk.IntVar(value=1)
+        self.interpolation_alpha_var = tk.DoubleVar(value=0.0)
+        self.latent_slider_vars: list[tk.DoubleVar] = []
+        self.latent_sliders: list[ttk.Scale] = []
+        self.latent_base: Tensor | None = None
         self._image_refs: list[tk.PhotoImage] = []
 
         self.root.title("AE/VAE Model Explorer")
         self._build_ui()
         self._update_description()
-        self._update_generation_state()
+        self._update_vae_control_state()
 
     def _build_ui(self) -> None:
         main = ttk.Frame(self.root, padding=12)
@@ -267,15 +351,49 @@ class ModelExplorerApp:
         )
         self.generate_button.grid(row=0, column=3)
 
+        latent = ttk.LabelFrame(main, text="VAE latent controls", padding=8)
+        latent.grid(row=3, column=0, sticky="ew", pady=(12, 0))
+
+        ttk.Label(latent, text="Image B").grid(row=0, column=0, padx=(0, 4))
+        self.image_b_combo = ttk.Combobox(
+            latent,
+            textvariable=self.image_b_index_var,
+            values=(),
+            width=24,
+            state="disabled",
+        )
+        self.image_b_combo.grid(row=0, column=1, padx=(0, 8))
+
+        ttk.Label(latent, text="A to B").grid(row=0, column=2, padx=(0, 4))
+        self.interpolation_slider = ttk.Scale(
+            latent,
+            from_=0.0,
+            to=1.0,
+            variable=self.interpolation_alpha_var,
+            command=self._interpolate_from_slider,
+        )
+        self.interpolation_slider.grid(row=0, column=3, sticky="ew", padx=(0, 8))
+        latent.columnconfigure(3, weight=1)
+
+        self.encode_button = ttk.Button(
+            latent,
+            text="Encode Selected",
+            command=self._encode_selected_for_latent_sliders,
+        )
+        self.encode_button.grid(row=0, column=4)
+
+        self.latent_sliders_frame = ttk.Frame(latent)
+        self.latent_sliders_frame.grid(row=1, column=0, columnspan=5, sticky="ew", pady=(8, 0))
+
         display = ttk.Frame(main)
-        display.grid(row=3, column=0, sticky="nsew", pady=(12, 8))
-        main.rowconfigure(3, weight=1)
+        display.grid(row=4, column=0, sticky="nsew", pady=(12, 8))
+        main.rowconfigure(4, weight=1)
         self.original_label = self._image_panel(display, "Original", 0)
         self.reconstruction_label = self._image_panel(display, "Reconstruction", 1)
         self.generated_label = self._image_panel(display, "Generated", 2)
 
         ttk.Label(main, textvariable=self.status_var, wraplength=780).grid(
-            row=4,
+            row=5,
             column=0,
             sticky="ew",
         )
@@ -289,7 +407,7 @@ class ModelExplorerApp:
 
     def _on_model_selection_changed(self, _event: object | None = None) -> None:
         self._update_description()
-        self._update_generation_state()
+        self._update_vae_control_state()
 
     def _choose_checkpoint(self) -> None:
         path = filedialog.askopenfilename(
@@ -313,7 +431,8 @@ class ModelExplorerApp:
         self.checkpoint_var.set(str(loaded.path))
         self._set_image_choices()
         self.status_var.set(f"Loaded {loaded.config.model_type.upper()} checkpoint.")
-        self._update_generation_state()
+        self._reset_latent_controls()
+        self._update_vae_control_state()
 
     def _set_image_choices(self) -> None:
         choices = [
@@ -321,8 +440,10 @@ class ModelExplorerApp:
             for index, label in enumerate(self.service.test_labels)
         ]
         self.image_combo.configure(values=choices)
+        self.image_b_combo.configure(values=choices)
         if choices:
             self.image_combo.current(0)
+            self.image_b_combo.current(1 if len(choices) > 1 else 0)
 
     def _reconstruct(self) -> None:
         try:
@@ -347,10 +468,90 @@ class ModelExplorerApp:
         self._set_panel_image(self.generated_label, image_grid_tensor(generated, columns=2))
         self.status_var.set("Random VAE generation complete.")
 
+    def _interpolate_from_slider(self, _value: object | None = None) -> None:
+        if not self.service.vae_features_available():
+            return
+        try:
+            image = self.service.interpolate_selected_images(
+                self._selected_image_index(),
+                self._selected_image_b_index(),
+                self.interpolation_alpha_var.get(),
+            )
+        except Exception as error:  # noqa: BLE001 - recoverable GUI boundary
+            self._show_error(str(error))
+            return
+        self._set_panel_image(self.generated_label, image)
+        self.status_var.set("Latent interpolation updated.")
+
+    def _encode_selected_for_latent_sliders(self) -> None:
+        try:
+            self.latent_base = self.service.encode_selected_image(
+                self._selected_image_index()
+            )
+        except Exception as error:  # noqa: BLE001 - recoverable GUI boundary
+            self._show_error(str(error))
+            return
+        self._build_latent_sliders(self.latent_base)
+        decoded = self.service.decode_latent(self.latent_base)
+        self._set_panel_image(self.generated_label, decoded)
+        self.status_var.set("Selected image encoded for latent editing.")
+
+    def _build_latent_sliders(self, latent: Tensor) -> None:
+        for child in self.latent_sliders_frame.winfo_children():
+            child.destroy()
+        self.latent_slider_vars = []
+        self.latent_sliders = []
+        count = min(LATENT_SLIDER_LIMIT, latent.shape[0])
+        for index in range(count):
+            ttk.Label(self.latent_sliders_frame, text=f"z{index}").grid(
+                row=index // 4,
+                column=(index % 4) * 2,
+                padx=(0, 4),
+                sticky="e",
+            )
+            variable = tk.DoubleVar(value=float(latent[index].clamp(-3.0, 3.0)))
+            slider = ttk.Scale(
+                self.latent_sliders_frame,
+                from_=LATENT_SLIDER_MIN,
+                to=LATENT_SLIDER_MAX,
+                variable=variable,
+                command=self._decode_latent_slider_values,
+            )
+            slider.grid(
+                row=index // 4,
+                column=(index % 4) * 2 + 1,
+                sticky="ew",
+                padx=(0, 10),
+            )
+            self.latent_sliders_frame.columnconfigure((index % 4) * 2 + 1, weight=1)
+            self.latent_slider_vars.append(variable)
+            self.latent_sliders.append(slider)
+
+    def _decode_latent_slider_values(self, _value: object | None = None) -> None:
+        if self.latent_base is None or not self.service.vae_features_available():
+            return
+        values = {
+            index: variable.get()
+            for index, variable in enumerate(self.latent_slider_vars)
+        }
+        try:
+            decoded = self.service.decode_modified_latent(self.latent_base, values)
+        except Exception as error:  # noqa: BLE001 - recoverable GUI boundary
+            self._show_error(str(error))
+            return
+        self._set_panel_image(self.generated_label, decoded)
+        self.status_var.set("Latent vector decoded.")
+
     def _selected_image_index(self) -> int:
         value = self.image_combo.get()
         if not value:
             raise ValueError("Select a Fashion-MNIST test image first")
+        return int(value.split(":", maxsplit=1)[0])
+
+    def _selected_image_b_index(self) -> int:
+        value = self.image_b_combo.get()
+        if not value:
+            raise ValueError("Select a second Fashion-MNIST test image first")
         return int(value.split(":", maxsplit=1)[0])
 
     def _set_panel_image(self, label: ttk.Label, image: Tensor) -> None:
@@ -370,9 +571,24 @@ class ModelExplorerApp:
             description = str(error)
         self.description_var.set(description)
 
-    def _update_generation_state(self) -> None:
-        state = "normal" if self.model_type_var.get() == "vae" else "disabled"
+    def _update_vae_control_state(self) -> None:
+        loaded_vae = self.service.vae_features_available()
+        selected_vae = self.model_type_var.get() == "vae"
+        state = "normal" if loaded_vae and selected_vae else "disabled"
         self.generate_button.configure(state=state)
+        self.image_b_combo.configure(state="readonly" if state == "normal" else "disabled")
+        self.interpolation_slider.configure(state=state)
+        self.encode_button.configure(state=state)
+        for slider in self.latent_sliders:
+            slider.configure(state=state)
+
+    def _reset_latent_controls(self) -> None:
+        self.latent_base = None
+        self.interpolation_alpha_var.set(0.0)
+        for child in self.latent_sliders_frame.winfo_children():
+            child.destroy()
+        self.latent_slider_vars = []
+        self.latent_sliders = []
 
     def _show_error(self, message: str) -> None:
         self.status_var.set(message)
@@ -403,6 +619,11 @@ def smoke_test_gui(
     app.load_checkpoint(Path(vae_checkpoint))
     app._reconstruct()
     app._generate_random()
+    app._interpolate_from_slider()
+    app._encode_selected_for_latent_sliders()
+    if app.latent_slider_vars:
+        app.latent_slider_vars[0].set(0.5)
+        app._decode_latent_slider_values()
     root.update_idletasks()
     root.destroy()
 

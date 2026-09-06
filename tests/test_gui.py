@@ -7,8 +7,12 @@ from torch.utils.data import DataLoader, TensorDataset
 from deep_learning_generative_models.config import ExperimentConfig
 from deep_learning_generative_models.device import DeviceInfo
 from deep_learning_generative_models.gui import (
+    LATENT_SLIDER_MAX,
+    LATENT_SLIDER_MIN,
     ModelExplorerService,
     image_grid_tensor,
+    interpolate_latent_vectors,
+    modify_latent_vector,
     model_reconstruction,
     tensor_to_tk_color_rows,
 )
@@ -95,6 +99,37 @@ def test_image_grid_tensor_combines_generated_images() -> None:
     assert torch.all(grid <= 1)
 
 
+def test_interpolate_latent_vectors_preserves_endpoints_and_midpoint() -> None:
+    start = torch.tensor([0.0, 2.0, 4.0])
+    end = torch.tensor([10.0, 12.0, 14.0])
+
+    assert torch.equal(interpolate_latent_vectors(start, end, 0.0), start)
+    assert torch.equal(interpolate_latent_vectors(start, end, 1.0), end)
+    assert torch.equal(
+        interpolate_latent_vectors(start, end, 0.5),
+        torch.tensor([5.0, 7.0, 9.0]),
+    )
+
+
+def test_modify_latent_vector_updates_bounded_dimensions() -> None:
+    latent = torch.zeros(4)
+
+    modified = modify_latent_vector(
+        latent,
+        {
+            0: -10.0,
+            1: 0.5,
+            3: 10.0,
+        },
+    )
+
+    assert modified[0] == LATENT_SLIDER_MIN
+    assert modified[1] == 0.5
+    assert modified[2] == 0.0
+    assert modified[3] == LATENT_SLIDER_MAX
+    assert torch.equal(latent, torch.zeros(4))
+
+
 def test_service_loads_checkpoint_and_reconstructs(monkeypatch, tmp_path) -> None:
     checkpoint_path = _save_checkpoint(tmp_path, "ae")
 
@@ -167,6 +202,60 @@ def test_service_generates_random_images_for_vae(monkeypatch, tmp_path) -> None:
     assert torch.all(images <= 1)
 
 
+def test_service_interpolates_selected_images_for_vae(monkeypatch, tmp_path) -> None:
+    checkpoint_path = _save_checkpoint(tmp_path, "vae")
+
+    class FakeLoaders:
+        test = _fake_loader()
+
+    monkeypatch.setattr(
+        "deep_learning_generative_models.gui.build_fashion_mnist_loaders",
+        lambda _config: FakeLoaders,
+    )
+
+    service = ModelExplorerService(DeviceInfo(torch.device("cpu"), "CPU test device."))
+    service.load_checkpoint(
+        checkpoint_path,
+        expected_model_type="vae",
+        expected_preset="small",
+        preview_count=4,
+    )
+
+    decoded = service.interpolate_selected_images(0, 1, 0.5)
+
+    assert tuple(decoded.shape) == (1, 28, 28)
+    assert torch.all(decoded >= 0)
+    assert torch.all(decoded <= 1)
+
+
+def test_service_decodes_modified_latent_for_vae(monkeypatch, tmp_path) -> None:
+    checkpoint_path = _save_checkpoint(tmp_path, "vae")
+
+    class FakeLoaders:
+        test = _fake_loader()
+
+    monkeypatch.setattr(
+        "deep_learning_generative_models.gui.build_fashion_mnist_loaders",
+        lambda _config: FakeLoaders,
+    )
+
+    service = ModelExplorerService(DeviceInfo(torch.device("cpu"), "CPU test device."))
+    service.load_checkpoint(
+        checkpoint_path,
+        expected_model_type="vae",
+        expected_preset="small",
+        preview_count=4,
+    )
+    latent = service.encode_selected_image(0)
+
+    decoded = service.decode_modified_latent(latent, {0: 1.0, 1: -1.0})
+
+    assert tuple(latent.shape) == (8,)
+    assert tuple(decoded.shape) == (1, 28, 28)
+    assert torch.all(decoded >= 0)
+    assert torch.all(decoded <= 1)
+
+
 def test_service_rejects_generation_for_ae(monkeypatch, tmp_path) -> None:
     checkpoint_path = _save_checkpoint(tmp_path, "ae")
 
@@ -188,3 +277,6 @@ def test_service_rejects_generation_for_ae(monkeypatch, tmp_path) -> None:
 
     with pytest.raises(ValueError, match="requires a VAE checkpoint"):
         service.generate_random()
+
+    with pytest.raises(ValueError, match="requires a VAE checkpoint"):
+        service.interpolate_selected_images(0, 1, 0.5)
