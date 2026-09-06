@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document records current core infrastructure, the Fashion-MNIST data boundary, Autoencoder and Variational Autoencoder model layers, AE/VAE training, AE reconstruction evaluation, and intended future component boundaries. It does not describe generation workflows, latent interpolation workflows, or GUI implementation.
+This document records current core infrastructure, the Fashion-MNIST data boundary, Autoencoder and Variational Autoencoder model layers, AE/VAE training, AE reconstruction evaluation, VAE generation/interpolation core, and intended future component boundaries. It does not describe GUI implementation or AE vs VAE experiment suites.
 
 ## Decisions Already Made
 
@@ -197,16 +197,49 @@ Evaluation outputs are stored under the checkpoint experiment directory:
 
 The evaluation summary includes checkpoint path, model type, architecture preset, latent dimension, device, evaluated sample count, test reconstruction loss, and generated artifact paths.
 
+## Implemented VAE Generation Boundary
+
+Current generation module:
+
+- `generate.py`: explicit package-style VAE generation command, reusable VAE checkpoint loading, prior sampling, image decoding, latent interpolation, image-grid saving, and JSON summary persistence.
+
+Generation command:
+
+```bash
+uv run python -m deep_learning_generative_models.generate --checkpoint experiments/<experiment-name>/checkpoint.pt --mode both
+```
+
+Generation occurs only when this command is run. Importing the package or opening the project does not generate images, load data, or retrain models.
+
+Generation policy:
+
+- checkpoints must be VAE checkpoints
+- VAE weights are loaded from `model_state_dict`
+- random samples are drawn from the standard normal latent prior
+- generated samples are decoded through the trained VAE decoder
+- interpolation uses the encoder mean vectors from two selected Fashion-MNIST test images
+- interpolation is linear between the two latent vectors
+- generated image tensors preserve shape `[count, 1, 28, 28]`
+- generated image values remain in `[0.0, 1.0]`
+- optional seeds make prior sampling deterministic where practical
+
+Generation outputs are stored under the checkpoint experiment directory:
+
+- `generation/generated_grid.png`
+- `generation/latent_interpolation.png`
+- `generation/generation_summary.json`
+
+The generation summary includes checkpoint path, model type, architecture preset, latent dimension, device, mode, generated sample count, interpolation step count, selected interpolation indices, and generated artifact paths.
+
 ## Planned Component Boundaries
 
 Future implementation should separate these responsibilities:
 
 - AE vs VAE comparison
-- generation and latent-space utilities
 - plotting and visualization helpers
 - later GUI exploration layer
 
-Core infrastructure, Fashion-MNIST data modules, AE and VAE model layers, AE/VAE training, and AE reconstruction evaluation exist now. Generation, visualization, GUI, and comparison modules should be introduced when their milestone begins.
+Core infrastructure, Fashion-MNIST data modules, AE and VAE model layers, AE/VAE training, AE reconstruction evaluation, and VAE generation/interpolation core exist now. GUI and comparison modules should be introduced when their milestone begins.
 
 ## Planned Data Flow
 
@@ -222,7 +255,8 @@ At a high level, future runs should follow this flow:
 8. Train the AE only through an explicit training command and save checkpoint/history artifacts.
 9. Evaluate trained AE checkpoints without retraining and save reconstruction artifacts.
 10. Train the VAE only through an explicit training command and save checkpoint/history artifacts.
-11. Later milestones will add generation, latent interpolation, AE vs VAE comparison, and GUI exploration.
+11. Generate VAE samples and latent interpolations only from an existing VAE checkpoint.
+12. Later milestones will add AE vs VAE comparison and GUI exploration.
 
 ## Deferred Implementation Details
 

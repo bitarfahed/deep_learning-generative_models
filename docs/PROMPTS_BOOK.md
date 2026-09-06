@@ -558,3 +558,75 @@ Final report should be short and contain only:
 
 Stop after VAE training works end-to-end.
 ```
+
+## Prompt 10 - Generation & Latent-Space Exploration Core
+
+```text
+PROMPT 10 — Generation & Latent-Space Exploration Core
+
+Inspect the repository and follow the existing architecture/documentation.
+
+Goal:
+Add the core VAE generation and latent-space exploration functionality, without GUI.
+
+Requirements:
+
+1. Implement reliable loading of a trained VAE checkpoint without retraining.
+
+2. Implement random generation:
+
+   - sample latent vectors from the VAE prior
+   - decode them into Fashion-MNIST images
+   - save a grid of generated images
+
+3. Implement latent interpolation:
+
+   - encode two selected test images
+   - use their latent representations
+   - interpolate between them across several steps
+   - decode and save the interpolation sequence
+
+4. Add reusable APIs that the future GUI can call directly.
+   Keep generation logic independent from UI code.
+
+5. Provide a small package-style CLI for running generation/interpolation from an existing checkpoint.
+
+6. Save outputs inside the existing experiment/artifact structure.
+
+7. Add focused, fast tests for:
+
+   - random latent sampling
+   - generated image shapes/ranges
+   - interpolation endpoints and intermediate shapes
+   - checkpoint loading
+   - deterministic behavior where a fixed seed makes it practical
+
+8. Run a lightweight real smoke test using an existing VAE checkpoint.
+   Do not perform new training unless absolutely necessary for verification.
+
+9. Update documentation only where necessary.
+
+10. Append this prompt to docs/PROMPTS_BOOK.md as:
+
+Prompt 10 — Generation & Latent-Space Exploration Core
+
+Preserve all previous entries.
+
+Do NOT implement:
+
+- GUI
+- AE vs VAE experiment suite
+- long/full training
+- GAN/diffusion or other generative models
+
+Run the relevant/full test suite and commit the completed work.
+
+Final report should contain only:
+
+- main changes
+- tests/results
+- generation/interpolation smoke result
+- any problem or decision requiring attention
+
+Stop after generation and latent interpolation work without GUI.
+```

@@ -31,7 +31,7 @@ The project emphasizes educational value, clear architecture, reproducible exper
 
 ## Current status
 
-Repository bootstrap, project design documentation, core infrastructure, the Fashion-MNIST data pipeline, the Convolutional Autoencoder model layer, explicit Autoencoder training, AE reconstruction evaluation, the VAE model layer, and explicit VAE training are complete. Generation utilities, latent interpolation workflows, and GUI code have not been implemented yet.
+Repository bootstrap, project design documentation, core infrastructure, the Fashion-MNIST data pipeline, AE/VAE model layers, explicit AE/VAE training, AE reconstruction evaluation, and VAE generation/interpolation core are complete. AE vs VAE comparison and GUI code have not been implemented yet.
 
 Run the infrastructure smoke check from the source tree:
 
@@ -66,6 +66,14 @@ uv run python -m deep_learning_generative_models.evaluate --checkpoint experimen
 ```
 
 Evaluation loads an existing checkpoint and writes reconstruction figures, a training-loss plot, and a JSON summary under the same experiment directory.
+
+Generate samples and latent interpolations from a trained VAE checkpoint:
+
+```bash
+uv run python -m deep_learning_generative_models.generate --checkpoint experiments/<experiment-name>/checkpoint.pt --mode both --count 16 --steps 8 --seed 42
+```
+
+Generation loads an existing VAE checkpoint and writes generated image grids, latent interpolation figures, and a JSON summary under the same experiment directory.
 
 The future GUI is intended as an educational exploration layer over working models, not as the main purpose of the project. Training must not run automatically just because the GUI/application is opened.
 
