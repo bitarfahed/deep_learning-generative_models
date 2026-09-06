@@ -145,6 +145,7 @@ Training policy:
 - VAE total loss is reconstruction loss plus KL-divergence loss
 - VAE reconstruction loss is mean squared error
 - VAE KL loss is `-0.5 * mean(sum(1 + logvar - mu^2 - exp(logvar)))`
+- The current VAE loss adds mean pixel reconstruction MSE to mean per-example KL loss without a beta coefficient.
 - optimizer is Adam using the configured learning rate
 - images are moved to the selected device
 - AE training history records average per-example reconstruction loss by epoch
@@ -157,6 +158,7 @@ Checkpoint contract:
 - checkpoint file: `checkpoint.pt`
 - format: `torch.save` dictionary with `state_dict`, not a serialized model object
 - includes model type, architecture preset, latent dimension, epoch count, resolved config, training history, and model weights
+- checkpoint loading validates top-level model metadata against the saved resolved configuration
 - VAE checkpoints include enough metadata to reconstruct the selected VAE preset through the shared model factory
 
 History contract:

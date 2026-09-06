@@ -28,17 +28,15 @@ Not currently required:
 Decided:
 
 - Fashion-MNIST will be the project dataset.
-- Dataset files should eventually download automatically when needed.
-- Dataset files should be cached locally.
+- Dataset files download automatically when needed.
+- Dataset files are cached locally.
 - Dataset files must not be committed to Git.
 
 Deferred:
 
-- Exact local data directory layout
-- Transform choices
 - Train/validation split policy
 
-No dataset download or dataset implementation exists yet.
+Fashion-MNIST loading is implemented with `ToTensor()` preprocessing and explicit optional train/test subsets.
 
 ## Model Progression
 
@@ -50,17 +48,14 @@ Decided:
 - The VAE should eventually support reconstruction, latent-space sampling, image generation, interpolation, and interactive latent-space exploration.
 - GANs, diffusion models, transformers, and LLMs are outside the project scope.
 
-Planned architecture policy:
+Implemented architecture policy:
 
-- Provide three fixed architecture presets: Small, Medium, and Deep.
+- AE and VAE provide three fixed architecture presets: Small, Medium, and Deep.
 - Users may select a preset but should not arbitrarily modify its internal architecture.
-- Each preset should eventually have a concise human-readable description.
+- Each preset has a concise human-readable description.
 
 Deferred:
 
-- Final layer definitions
-- Channel counts
-- Latent dimensions
 - Hyperparameters
 
 ## Training and Configuration Policy
@@ -73,7 +68,7 @@ Planned behavior:
 - The application should load previously trained checkpoints instead of retraining whenever it starts.
 - Hardware selection should detect a compatible GPU when available and fall back cleanly to CPU.
 
-Configuration should stay simple and explicit. It should eventually capture settings such as:
+Configuration stays simple and explicit. It captures:
 
 - model type
 - architecture preset
@@ -123,18 +118,21 @@ Additional metrics should not be added merely to make the project appear more co
 
 The intended implementation direction is a clean shared package and training pipeline rather than duplicated AE/VAE scripts.
 
-Conceptually, later commands may resemble:
+Implemented commands include:
 
 ```bash
 python -m deep_learning_generative_models.train --model ae
 python -m deep_learning_generative_models.train --model vae
+python -m deep_learning_generative_models.evaluate --checkpoint <checkpoint>
+python -m deep_learning_generative_models.generate --checkpoint <checkpoint>
+python -m deep_learning_generative_models.compare --ae-checkpoint <checkpoint> --vae-checkpoint <checkpoint>
 ```
 
-The CLI has not been implemented yet.
+Training, evaluation, generation, and comparison remain explicit CLI actions.
 
 ## GUI Direction
 
-The GUI is a later milestone and must not be implemented during design documentation.
+The GUI is the next milestone and must remain separate from the completed non-GUI core.
 
 Its purpose is educational exploration of already working models. It should eventually allow users to:
 
@@ -185,7 +183,7 @@ Unless a later prompt explicitly changes the scope, do not add:
 9. VAE training integration - completed
 10. Generation and latent-space exploration core - completed
 11. AE vs VAE experiments/comparison - completed
-12. Engineering and QA
+12. Engineering and QA - completed
 13. Interactive GUI core
 14. Latent-space GUI features
 15. Final documentation and portfolio audit
@@ -198,4 +196,4 @@ This project is being developed with significant assistance from ChatGPT and Cod
 
 ## Next Step
 
-The next milestone is Engineering and QA. It should stabilize the existing workflows without implementing GUI behavior prematurely.
+The next milestone is Interactive GUI core. It should build on the existing callable core without retraining automatically or introducing unrelated infrastructure.

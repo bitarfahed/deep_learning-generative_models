@@ -108,6 +108,7 @@ def train_one_epoch(
     optimizer: torch.optim.Optimizer,
     loss_fn: nn.Module,
 ) -> float:
+    """Train one tensor-output reconstruction model for legacy AE callers."""
     model.train()
     total_loss = 0.0
     total_examples = 0
@@ -335,18 +336,9 @@ def load_autoencoder_checkpoint(
     checkpoint_path: Path | str,
     map_location: str | torch.device = "cpu",
 ) -> tuple[ConvolutionalAutoencoder, dict[str, object]]:
-    checkpoint = torch.load(
-        checkpoint_path,
-        map_location=map_location,
-        weights_only=False,
-    )
-    if checkpoint.get("model_type") != "ae":
+    model, checkpoint = load_model_checkpoint(checkpoint_path, map_location=map_location)
+    if not isinstance(model, ConvolutionalAutoencoder):
         raise ValueError("Checkpoint is not an Autoencoder checkpoint")
-
-    config = ExperimentConfig(**checkpoint["config"])
-    model = build_model(config)
-    model.load_state_dict(checkpoint["model_state_dict"])
-    model.eval()
     return model, checkpoint
 
 
@@ -364,10 +356,28 @@ def load_model_checkpoint(
         raise ValueError(f"Unsupported checkpoint model type: {model_type!r}")
 
     config = ExperimentConfig(**checkpoint["config"])
+    _validate_checkpoint_metadata(checkpoint, config)
     model = build_model(config)
     model.load_state_dict(checkpoint["model_state_dict"])
     model.eval()
     return model, checkpoint
+
+
+def _validate_checkpoint_metadata(
+    checkpoint: dict[str, object],
+    config: ExperimentConfig,
+) -> None:
+    expected = {
+        "model_type": config.model_type,
+        "architecture_preset": config.architecture_preset,
+        "latent_dim": config.latent_dim,
+        "epochs": config.epochs,
+    }
+    for field, expected_value in expected.items():
+        if checkpoint.get(field) != expected_value:
+            raise ValueError(
+                f"Checkpoint metadata field {field!r} does not match config"
+            )
 
 
 def run_training(config: ExperimentConfig) -> TrainingResult:

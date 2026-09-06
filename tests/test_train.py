@@ -250,6 +250,27 @@ def test_saved_autoencoder_checkpoint_can_be_loaded(config, paths) -> None:
     assert checkpoint["model_type"] == "ae"
 
 
+def test_model_checkpoint_rejects_inconsistent_metadata(config, paths) -> None:
+    device = DeviceInfo(torch.device("cpu"), "CPU selected for test.")
+    experiment = create_experiment(config, device, paths=paths)
+    result = train_autoencoder(
+        config=config,
+        train_loader=_tiny_loader(),
+        device_info=device,
+        experiment=experiment,
+    )
+    checkpoint = torch.load(
+        result.checkpoint_path,
+        map_location="cpu",
+        weights_only=False,
+    )
+    checkpoint["latent_dim"] = config.latent_dim + 1
+    torch.save(checkpoint, result.checkpoint_path)
+
+    with pytest.raises(ValueError, match="does not match config"):
+        load_model_checkpoint(result.checkpoint_path)
+
+
 def test_load_autoencoder_checkpoint_rejects_vae_checkpoint(paths) -> None:
     config = _vae_config()
     device = DeviceInfo(torch.device("cpu"), "CPU selected for test.")

@@ -706,3 +706,152 @@ Final report should contain only:
 
 Stop after the AE vs VAE comparison workflow works.
 ```
+
+## Prompt 12 - Core Engineering & QA Audit
+
+```text
+PROMPT 12 — Core Engineering & QA Audit
+
+Inspect the complete current repository before making changes.
+
+Goal:
+Audit and stabilize the completed non-GUI core before GUI development begins.
+
+This is primarily a QA task, not a feature-development task.
+
+## Audit
+
+Verify the complete workflow:
+
+Fashion-MNIST
+→ AE/VAE construction
+→ training
+→ checkpoint saving
+→ checkpoint loading
+→ evaluation
+→ VAE generation/interpolation
+→ AE vs VAE comparison
+
+Pay particular attention to:
+
+1. Training
+
+- Check AE/VAE shared training logic for duplication, obsolete paths, or behavioral drift.
+- Review the relationship between existing training functions such as train_one_epoch and train_one_epoch_with_metrics.
+- Remove dead/obsolete duplication only if clearly safe.
+- Verify AE behavior is not changed accidentally by VAE integration.
+
+2. VAE loss
+
+- Verify reconstruction + KL loss is mathematically and numerically coherent with the current reduction/scaling policy.
+- Do not introduce beta-VAE or new loss features unless fixing an actual correctness issue.
+- Document any important finding.
+
+3. Checkpoints
+
+- Audit save/load behavior across training, evaluation, generation, and comparison.
+- Verify required metadata is consistent and validated.
+- Avoid duplicated checkpoint-loading logic where a small safe consolidation is clearly justified.
+
+4. Models
+
+- Verify Small/Medium/Deep presets form a sensible capacity progression for both AE and VAE.
+- Verify all input/output/latent shape contracts.
+- Verify architecture descriptions match implementation.
+
+5. Reproducibility and devices
+
+- Verify seed handling.
+- Verify CPU operation end-to-end.
+- Verify CUDA detection/fallback remains safe.
+- Report the current CUDA/PyTorch status, but do not reinstall PyTorch, CUDA, or drivers.
+
+6. Artifacts and Git
+
+- Verify datasets, checkpoints, experiments, caches, IDE files, and virtual environments are not accidentally tracked.
+- Do not delete useful local artifacts unnecessarily.
+
+7. Tests
+   Audit the existing tests for meaningful coverage, not only shape/smoke checks.
+
+Add regression tests only where a real coverage gap or bug risk is identified.
+
+Keep tests fast and independent of CUDA or long training.
+
+8. Documentation
+   Verify README.md, docs/PLAN.md, and docs/ARCHITECTURE.md accurately describe the implemented system.
+
+Correct factual inconsistencies if found.
+Do not expand documentation unnecessarily.
+
+9. Future GUI boundary
+   Verify that reconstruction, checkpoint loading, VAE generation, latent handling, and interpolation are reusable without coupling them to CLI internals.
+
+Only make small refactors if necessary to establish a clean callable boundary for the future GUI.
+
+Do NOT implement GUI code.
+
+## Scope Discipline
+
+Fix:
+
+- actual bugs
+- correctness problems
+- clear dead/obsolete code
+- unsafe duplication
+- important missing regression coverage
+- documentation inconsistencies
+
+Do NOT:
+
+- redesign working architecture without need
+- add features
+- add new model families
+- perform hyperparameter optimization
+- add TensorBoard/cloud/database/API infrastructure
+- implement GUI
+- perform long training runs
+
+Prefer leaving correct working code unchanged.
+
+## Verification
+
+Run the full test suite.
+
+Perform lightweight end-to-end verification of the major existing workflows where practical using existing checkpoints/artifacts.
+
+Do not retrain models unnecessarily.
+
+Inspect final Git status and tracked files.
+
+## Prompt Book
+
+Append this prompt to docs/PROMPTS_BOOK.md as:
+
+Prompt 12 — Core Engineering & QA Audit
+
+Preserve all previous entries.
+
+## Commit
+
+If changes are justified, commit them with an appropriate message.
+
+If the audit finds that no code changes are needed, do not manufacture changes merely to create a commit; documentation/Prompt Book updates may still be committed as appropriate.
+
+## Final Report
+
+Keep the report concise.
+
+Include only:
+
+- bugs/problems found
+- changes made
+- tests and verification results
+- CUDA/PyTorch device status
+- whether the core is ready for GUI development
+- any issue requiring my decision
+
+Stop after the core QA/stabilization pass.
+
+Do not begin GUI implementation.
+```
