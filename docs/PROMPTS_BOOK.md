@@ -1360,3 +1360,63 @@ Final report should contain only:
 
 Do not perform additional development.
 ```
+
+## Prompt 18 - Document AE/VAE Experimental Observations
+
+```text
+PROMPT 18 - Document AE/VAE Experimental Observations
+
+Inspect the existing documentation and make a small documentation-only update.
+
+Goal:
+Record the actual qualitative observations from the final AE and VAE runs and their technical interpretation.
+
+Add a concise section such as "Observed Results", "Experiment Notes", or similar in the most appropriate documentation file.
+
+Document:
+
+- The final AE Small run (8 epochs) produced reasonably good reconstruction quality.
+- The final VAE Small run (12 epochs) produced noticeably weaker reconstruction/generation quality.
+- The VAE used a basic configuration without extensive hyperparameter tuning.
+
+Explain the observation briefly:
+
+- The AE directly optimizes reconstruction quality.
+- The VAE additionally uses KL regularization to encourage a structured probabilistic latent space.
+- This creates a trade-off between reconstruction fidelity and latent-space regularization suitable for sampling and generation.
+
+Clarify that the VAE stage was primarily intended to demonstrate:
+
+- latent distributions (mu/log-variance)
+- reparameterization
+- sampling and generation
+- latent interpolation
+
+The project intentionally stops without extensive VAE hyperparameter tuning because optimizing generative quality further is outside the chosen portfolio scope.
+
+Important:
+
+- Present these as project observations and scope decisions.
+- Do not frame them as interview preparation.
+- Do not describe them as excuses.
+- Do not claim Fashion-MNIST is too small.
+- Do not claim the VAE represents best achievable performance.
+- Do not invent numerical metrics.
+- Do not change code, models, configs, dependencies, or training behavior.
+
+Append this prompt to docs/PROMPTS_BOOK.md as:
+
+Prompt 18 - Document AE/VAE Experimental Observations
+
+Preserve all previous entries.
+
+Commit the documentation update.
+
+Final report should only state:
+
+- which documentation was updated
+- where the observations were added
+- whether any documentation inconsistency was found
+
+Do not perform additional development.
+```

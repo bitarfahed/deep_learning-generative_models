@@ -89,9 +89,13 @@ The GUI is an educational layer over trained models. It supports AE/VAE selectio
 
 The GUI uses previously trained checkpoints. For the final portfolio examples, the Small preset was used for both AE and VAE. Medium and Deep remain implemented architecture options, but they were not required for the final portfolio runs.
 
-## Observed Final Result
+## Observed Results
 
-The final AE Small reconstruction output was reasonably good in the observed run. The final VAE Small output and reconstruction quality was noticeably weaker. This result is documented intentionally: the AE is the stronger reconstruction baseline here, while the VAE primarily demonstrates variational latent-space learning, sampling from a prior, generation, and interpolation. The project does not hide that tradeoff or present the VAE as visually superior.
+The final AE Small run used 8 epochs and produced reasonably good reconstruction quality. The final VAE Small run used 12 epochs and produced noticeably weaker reconstruction and generation quality.
+
+This is a project observation and scope decision, not a performance limit for VAE models generally. The VAE used a basic configuration without extensive hyperparameter tuning. The AE directly optimizes reconstruction quality, while the VAE also uses KL regularization to encourage a structured probabilistic latent space. That creates a trade-off between reconstruction fidelity and latent-space regularization suitable for sampling and generation.
+
+The VAE stage is primarily included to demonstrate latent distributions through `mu` and log-variance, the reparameterization trick, sampling and generation, and latent interpolation. The project intentionally stops without extended VAE tuning because pushing generative quality further is outside the chosen portfolio scope.
 
 ## Example Smoke Outputs
 
