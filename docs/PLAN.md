@@ -86,6 +86,13 @@ Deferred:
 
 The project should support reproducibility through explicit seeds, saved configuration, and deterministic behavior where practical, without promising perfect bit-for-bit determinism across devices and backends.
 
+Final portfolio runs used the Small preset for both models:
+
+- AE Small: 8 epochs.
+- VAE Small: 12 epochs.
+
+Medium and Deep remain implemented architecture options, but they were not required for the final portfolio runs. In the observed final outputs, AE reconstruction quality was reasonably good while VAE reconstruction/generation quality was noticeably weaker. The VAE remains useful in this project as the variational latent-space, sampling, generation, and interpolation demonstration.
+
 ## Experiment and Output Policy
 
 Each training experiment should eventually produce a dedicated experiment directory containing appropriate outputs, such as:

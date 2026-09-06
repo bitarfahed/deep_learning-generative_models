@@ -1290,3 +1290,73 @@ Final report should contain only:
 
 Stop after the naming change.
 ```
+
+## Prompt 17 - Document Training and GUI Commands
+
+```text
+PROMPT 17 - Document Training and GUI Commands
+
+Inspect the current repository and update documentation only.
+
+Goal:
+Make the final project usage commands easy to find and document the actual final training setup/results honestly.
+
+Requirements:
+
+1. Update README.md with a clear "Running the Project" section containing the exact commands for:
+
+Train the final AE Small model:
+
+uv run python -m deep_learning_generative_models.train --model ae --preset small --epochs 8
+
+Train the final VAE Small model:
+
+uv run python -m deep_learning_generative_models.train --model vae --preset small --epochs 12
+
+Launch the GUI:
+
+uv run python -m deep_learning_generative_models.gui
+
+Also briefly explain:
+
+- training creates and saves a checkpoint automatically
+- training does not occur when the GUI opens
+- the GUI uses previously trained checkpoints
+- CUDA is selected automatically when available; otherwise the project falls back to CPU
+- Small is the preset actually used for the final trained AE/VAE examples; Medium and Deep remain implemented architecture options but were not required for the final portfolio runs
+
+2. Document the observed qualitative result honestly:
+
+- the final AE reconstruction was reasonably good
+- the final VAE output/reconstruction quality was noticeably weaker
+- do not hide or exaggerate this result
+- explain briefly that the VAE serves primarily to demonstrate variational latent-space learning, sampling, generation, and interpolation, while the AE provides the stronger reconstruction baseline in the observed runs
+
+Do not invent numerical results that are not available in the repository.
+
+3. Update docs/PLAN.md and/or other appropriate documentation only if needed so the final project status matches these actual runs.
+
+4. Do not change:
+
+- model code
+- training behavior
+- hyperparameters
+- GUI behavior
+- dependencies
+
+5. Append this prompt to docs/PROMPTS_BOOK.md as:
+
+Prompt 17 - Document Training and GUI Commands
+
+Preserve all previous entries.
+
+Commit the documentation changes.
+
+Final report should contain only:
+
+- documentation updated
+- where the commands were documented
+- any inconsistency discovered
+
+Do not perform additional development.
+```

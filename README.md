@@ -33,7 +33,7 @@ Run the test suite:
 uv run pytest
 ```
 
-## Run
+## Running the Project
 
 Smoke-check the package without training:
 
@@ -47,19 +47,19 @@ Inspect the Fashion-MNIST data pipeline:
 uv run python -m deep_learning_generative_models.data_inspect
 ```
 
-Train a lightweight AE explicitly:
+Train the final AE Small model:
 
 ```bash
-uv run python -m deep_learning_generative_models.train --model ae --preset small --epochs 1 --train-subset-size 256 --test-subset-size 64
+uv run python -m deep_learning_generative_models.train --model ae --preset small --epochs 8
 ```
 
-Train a lightweight VAE explicitly:
+Train the final VAE Small model:
 
 ```bash
-uv run python -m deep_learning_generative_models.train --model vae --preset small --epochs 1 --train-subset-size 256 --test-subset-size 64
+uv run python -m deep_learning_generative_models.train --model vae --preset small --epochs 12
 ```
 
-Training runs only when the training command is executed. Importing the package or opening the GUI never starts training.
+Training creates an experiment directory and saves a checkpoint automatically. Training runs only when the training command is executed; importing the package or opening the GUI never starts training. CUDA is selected automatically when available through PyTorch, otherwise the project falls back to CPU.
 
 Evaluate an existing AE checkpoint:
 
@@ -86,6 +86,12 @@ uv run python -m deep_learning_generative_models.gui
 ```
 
 The GUI is an educational layer over trained models. It supports AE/VAE selection, preset descriptions, compatible checkpoint loading, Fashion-MNIST test-image browsing, reconstruction display, VAE random generation, latent interpolation, and bounded latent-vector slider edits.
+
+The GUI uses previously trained checkpoints. For the final portfolio examples, the Small preset was used for both AE and VAE. Medium and Deep remain implemented architecture options, but they were not required for the final portfolio runs.
+
+## Observed Final Result
+
+The final AE Small reconstruction output was reasonably good in the observed run. The final VAE Small output and reconstruction quality was noticeably weaker. This result is documented intentionally: the AE is the stronger reconstruction baseline here, while the VAE primarily demonstrates variational latent-space learning, sampling from a prior, generation, and interpolation. The project does not hide that tradeoff or present the VAE as visually superior.
 
 ## Example Smoke Outputs
 
